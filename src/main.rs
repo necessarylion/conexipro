@@ -4,8 +4,7 @@ use actix_web::{
   middleware::{self, Logger, TrailingSlash},
   App, HttpServer,
 };
-// use actix_web_lab::middleware::from_fn;
-use conexipro::services::get_api_services;
+use conexipro::{middleware::cors::get_cors_config, services::get_api_services};
 use dotenv::dotenv;
 use env_logger::Env;
 use log::info;
@@ -28,7 +27,7 @@ async fn main() -> std::io::Result<()> {
 
   HttpServer::new(|| {
     App::new()
-      // .wrap(from_fn(my_mw))
+      .wrap(get_cors_config())
       .wrap(Logger::default())
       .wrap(middleware::NormalizePath::new(TrailingSlash::default()))
       .service(get_api_services())
