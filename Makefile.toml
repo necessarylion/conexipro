@@ -1,0 +1,19 @@
+# Requirements
+# - cargo install cargo-make
+# - cargo install cargo-watch
+
+# run dev server (cargo make dev) 
+[tasks.dev]
+command = "cargo"
+args = ["watch", "-c", "-w", "src", "-x", "run"]
+
+# cargo make migrate
+[tasks.migrate]
+command = "diesel"
+args = ["migration", "run"]
+
+# cargo make migrate:rollback
+[tasks."migrate:rollback"]
+command = "diesel"
+args = ["migration", "revert"]
+

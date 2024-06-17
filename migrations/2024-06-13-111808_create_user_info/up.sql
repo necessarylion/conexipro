@@ -1,0 +1,10 @@
+-- Your SQL goes here
+CREATE TABLE user_infos (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL,
+  info_key VARCHAR(255) NOT NULL,
+  info_value VARCHAR(255) NULL,
+  info_type VARCHAR(100) NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
