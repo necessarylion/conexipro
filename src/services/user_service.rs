@@ -4,11 +4,8 @@ use crate::{
   errors::handler::IError,
   models::user::{UpdateUserPayload, User},
   repository::user_repo::UserRepo,
-  requests::{
-    extra_requests::Auth,
-    user_update_request::{ChangeUsernameRequest, UserUpdateRequest},
-  },
-  utils::{db, to_str},
+  requests::user_update_request::{ChangeUsernameRequest, UserUpdateRequest},
+  utils::{auth::Auth, db, to_str},
 };
 
 pub struct UserService {

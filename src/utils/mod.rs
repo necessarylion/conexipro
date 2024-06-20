@@ -3,6 +3,7 @@ use std::env;
 use crate::errors::handler::IError;
 
 pub mod app;
+pub mod auth;
 pub mod db;
 pub mod firebase;
 pub mod jwt;

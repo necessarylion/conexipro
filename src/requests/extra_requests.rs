@@ -2,23 +2,13 @@ use actix_web::{web::Data, HttpRequest};
 
 use crate::{
   errors::handler::IError,
-  models::user::User,
   repository::user_repo::UserRepo,
   utils::{
     app::AppState,
+    auth::Auth,
     db::{get_db_conn, DbConn},
   },
 };
-
-pub struct Auth {
-  pub user: User,
-}
-
-impl Auth {
-  pub fn uid(&self) -> &String {
-    &self.user.uid
-  }
-}
 
 pub trait ExtraRequests {
   fn auth(&self) -> Result<Auth, IError>;
