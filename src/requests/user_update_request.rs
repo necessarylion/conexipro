@@ -19,8 +19,8 @@ pub struct UserUpdateRequest {
 #[derive(Debug, Deserialize, Validate)]
 pub struct ChangeUsernameRequest {
   #[validate(
-    required(message = "First name is required"),
-    length(min = 1, message = "First name is required")
+    required(message = "Username is required"),
+    length(min = 1, message = "Username is required")
   )]
   pub username: Option<String>,
 }

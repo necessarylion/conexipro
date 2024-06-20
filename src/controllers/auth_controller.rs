@@ -1,6 +1,7 @@
 use crate::{
   errors::handler::IError,
-  models::user::{self},
+  models::user::NewUserPayload,
+  repository::user_repo::UserRepo,
   requests::{extra_requests::ExtraRequests, user_register_request::UserRegisterRequest},
   utils::{db, firebase::FireAuth, jwt, to_str},
 };
@@ -25,7 +26,7 @@ pub async fn login_or_register(
   // get db connection
   let conn: &mut db::DbConn = &mut req.db_conn()?;
   // check if user exists with uid
-  let mut user = user::get_user_by_uid(conn, uid);
+  let mut user = UserRepo::get_user_by_uid(conn, uid);
 
   // if not exist create new one
   if user.is_err() {
@@ -33,14 +34,14 @@ pub async fn login_or_register(
     let email = firebase_user.email.as_ref();
     let email = to_str(email);
     // prepare new user payload
-    let new_user = user::NewUser {
+    let new_user = NewUserPayload {
       uid: uid,
       username: uid,
       first_name: display_name,
       display_name: display_name,
       email: email,
     };
-    user = user::create_user(conn, new_user);
+    user = UserRepo::create_user(conn, new_user);
   }
 
   let token = jwt::create(uid)?;

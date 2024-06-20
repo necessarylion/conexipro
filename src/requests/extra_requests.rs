@@ -2,7 +2,8 @@ use actix_web::{web::Data, HttpRequest};
 
 use crate::{
   errors::handler::IError,
-  models::user::{self, User},
+  models::user::User,
+  repository::user_repo::UserRepo,
   utils::{
     app::AppState,
     db::{get_db_conn, DbConn},
@@ -42,7 +43,7 @@ impl ExtraRequests for HttpRequest {
       let pool = &app_state.db_pool;
       let conn = &mut get_db_conn(pool)?;
       let uid = auth_id.unwrap().to_str().unwrap().to_string();
-      let user = user::get_user_by_uid(conn, &uid)?;
+      let user = UserRepo::get_user_by_uid(conn, &uid)?;
       return Ok(Auth { user });
     }
     return Err(IError::ServerError(String::from("failed to get app state")));
