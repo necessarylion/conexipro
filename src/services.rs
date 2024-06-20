@@ -17,6 +17,7 @@ pub fn get_api_services() -> Scope {
         .wrap(from_fn(auth_middleware::handler))
         .service(auth_controller::refresh)
         .service(auth_controller::fetch)
-        .service(user_controller::update),
+        .service(user_controller::update)
+        .service(user_controller::change_username),
     )
 }

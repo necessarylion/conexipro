@@ -64,6 +64,14 @@ pub fn get_user_by_uid(conn: &mut MysqlConnection, uid: &String) -> Result<User,
     .map_err(|err| IError::ServerError(err.to_string()))
 }
 
+pub fn get_user_by_username(conn: &mut MysqlConnection, username: &String) -> Result<User, IError> {
+  users::table
+    .filter(users::username.eq(username))
+    .select(User::as_select())
+    .first(conn)
+    .map_err(|err| IError::ServerError(err.to_string()))
+}
+
 pub fn update_user_by_uid(
   conn: &mut MysqlConnection,
   uid: &String,
@@ -85,5 +93,20 @@ pub fn update_user_by_uid(
         .select(User::as_select())
         .first(conn)
     })
-    .map_err(|err| IError::ServerError(err.to_string()))
+    .map_err(|err: diesel::result::Error| IError::ServerError(err.to_string()))
+}
+
+pub fn update_username_by_uid(
+  conn: &mut MysqlConnection,
+  uid: &String,
+  username: &String,
+) -> Result<(), IError> {
+  conn
+    .transaction(|conn| {
+      diesel::update(users_dsl.filter(users::uid.eq(uid)))
+        .set(users::username.eq(username))
+        .execute(conn)?;
+      Ok(())
+    })
+    .map_err(|err: diesel::result::Error| IError::ServerError(err.to_string()))
 }

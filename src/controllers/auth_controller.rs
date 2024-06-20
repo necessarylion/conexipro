@@ -1,14 +1,10 @@
 use crate::{
   errors::handler::IError,
   models::user::{self},
-  requests::{auth_request::AuthRequest, user_register_request::UserRegisterRequest},
-  utils::{app::AppState, db, firebase::FireAuth, jwt, to_str},
+  requests::{extra_requests::ExtraRequests, user_register_request::UserRegisterRequest},
+  utils::{db, firebase::FireAuth, jwt, to_str},
 };
-use actix_web::{
-  get,
-  web::{Data, Json},
-  HttpRequest, HttpResponse, Responder,
-};
+use actix_web::{get, web::Json, HttpRequest, HttpResponse, Responder};
 use serde_json::json;
 use validator::Validate;
 
@@ -17,8 +13,8 @@ use validator::Validate;
  * require firebase token to login
  */
 pub async fn login_or_register(
+  req: HttpRequest,
   info: Json<UserRegisterRequest>,
-  state: Data<AppState>,
 ) -> Result<impl Responder, IError> {
   info.validate().map_err(IError::ValidationError)?;
 
@@ -29,7 +25,7 @@ pub async fn login_or_register(
   let uid = firebase_user.local_id.as_ref().unwrap();
 
   // get db connection
-  let conn: &mut db::DbConn = &mut db::get_db_conn(&state.db_pool)?;
+  let conn: &mut db::DbConn = &mut req.db_conn()?;
   // check if user exists with uid
   let mut user = user::get_user_by_uid(conn, uid);
 
@@ -80,7 +76,7 @@ pub async fn fetch(req: HttpRequest) -> Result<impl Responder, IError> {
 pub async fn refresh(req: HttpRequest) -> Result<impl Responder, IError> {
   let auth = req.auth()?;
 
-  let token = jwt::create(auth.get_uid())?;
+  let token = jwt::create(auth.uid())?;
 
   let response = json!({
     "token": token,
