@@ -15,7 +15,7 @@ use conexipro::{
   services,
   utils::{
     app::AppState,
-    db::{get_db_pool, DbPool},
+    db::{get_db_pool, run_db_migrations, DbConn, DbPool},
   },
 };
 
@@ -34,6 +34,9 @@ async fn main() -> std::io::Result<()> {
   log::info!("Server running at http://{}:{}", "127.0.0.1", port);
 
   let pool: DbPool = get_db_pool();
+  let conn: &mut DbConn = &mut pool.get().unwrap();
+
+  run_db_migrations(conn);
 
   HttpServer::new(move || {
     App::new()

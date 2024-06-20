@@ -24,8 +24,11 @@ pub trait ExtraRequests {
   fn db_conn(&self) -> Result<DbConn, IError>;
 }
 
-// Implement the trait for ServiceRequest
 impl ExtraRequests for HttpRequest {
+  /// Get auth user from request
+  /// ```
+  /// let auth = req.auth()?;
+  /// ```
   fn auth(&self) -> Result<Auth, IError> {
     let headers = self.headers();
     let auth_id = headers.get("x-auth-id");
@@ -45,6 +48,10 @@ impl ExtraRequests for HttpRequest {
     return Err(IError::ServerError(String::from("failed to get app state")));
   }
 
+  /// get database connection from request
+  /// ```
+  /// let conn: &mut db::DbConn = &mut req.db_conn()?;
+  /// ```
   fn db_conn(&self) -> Result<DbConn, IError> {
     if let Some(app_state) = self.app_data::<Data<AppState>>() {
       let pool = &app_state.db_pool;

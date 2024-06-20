@@ -11,9 +11,7 @@ use actix_web::{post, put, web::Json, HttpRequest, Responder};
 use serde_json::json;
 use validator::Validate;
 
-/**
- * update user information
- */
+/// update user information
 #[post("/auth/user")]
 pub async fn update(
   req: HttpRequest,
@@ -37,9 +35,7 @@ pub async fn update(
   Ok(Json(user))
 }
 
-/**
- * change username
- */
+/// change username
 #[put("/auth/user/username")]
 pub async fn change_username(
   req: HttpRequest,
@@ -80,9 +76,7 @@ pub async fn change_username(
   })));
 }
 
-/**
- * change user avatar image
- */
+/// change user avatar image
 #[put("/auth/user/avatar")]
 pub async fn change_avatar(req: HttpRequest) -> Result<impl Responder, IError> {
   let auth = req.auth()?;

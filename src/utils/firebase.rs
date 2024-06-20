@@ -5,7 +5,7 @@ use crate::errors::handler::IError;
 
 #[derive(Clone, Debug)]
 pub struct FireAuth {
-  pub api_key: String, // web api key
+  pub api_key: String,
 }
 
 impl FireAuth {

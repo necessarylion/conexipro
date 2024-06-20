@@ -8,10 +8,8 @@ use actix_web::{get, web::Json, HttpRequest, HttpResponse, Responder};
 use serde_json::json;
 use validator::Validate;
 
-/**
- * user registration
- * require firebase token to login
- */
+/// user registration.
+/// require firebase token to login
 pub async fn login_or_register(
   req: HttpRequest,
   info: Json<UserRegisterRequest>,
@@ -60,18 +58,14 @@ pub async fn login_or_register(
   )
 }
 
-/**
- * fetch user information
- */
+/// fetch user information
 #[get("/auth/user")]
 pub async fn fetch(req: HttpRequest) -> Result<impl Responder, IError> {
   let auth = req.auth()?;
   Ok(Json(auth.user))
 }
 
-/**
- * refresh user new token
- */
+/// refresh user new token
 #[get("/auth/refresh")]
 pub async fn refresh(req: HttpRequest) -> Result<impl Responder, IError> {
   let auth = req.auth()?;

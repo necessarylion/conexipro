@@ -20,6 +20,7 @@ pub struct JwtToken {
   pub expired_date: DateTime<Utc>,
 }
 
+/// create jwt token by usring user uid
 pub fn create(uid: &String) -> Result<JwtToken, IError> {
   let exp_duration = Duration::days(5);
 
@@ -45,6 +46,7 @@ pub fn create(uid: &String) -> Result<JwtToken, IError> {
   })
 }
 
+/// verify jwt token
 pub fn verify(token: String) -> Result<Claims, IError> {
   let secret = get_env("JWT_SECRET")?;
   let decoded_result = decode::<Claims>(
