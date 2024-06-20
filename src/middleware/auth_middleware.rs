@@ -18,6 +18,7 @@ pub async fn handler(
     return Err(actix_web::error::ErrorUnauthorized("required bearer token"));
   }
   let token = token.unwrap().to_str().unwrap().replace("Bearer ", "");
+  // verify jwt token
   let claims = jwt::verify(token);
   if claims.is_err() {
     Err(actix_web::error::ErrorUnauthorized(claims.err().unwrap()))

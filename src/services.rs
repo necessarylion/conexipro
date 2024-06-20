@@ -1,4 +1,7 @@
-use crate::{controllers::auth_controller, middleware::auth_middleware};
+use crate::{
+  controllers::{auth_controller, user_controller},
+  middleware::auth_middleware,
+};
 use actix_web::{
   web::{post, scope},
   Scope,
@@ -14,6 +17,6 @@ pub fn get_api_services() -> Scope {
         .wrap(from_fn(auth_middleware::handler))
         .service(auth_controller::refresh)
         .service(auth_controller::fetch)
-        .service(auth_controller::update),
+        .service(user_controller::update),
     )
 }

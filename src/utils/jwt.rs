@@ -52,6 +52,6 @@ pub fn verify(token: String) -> Result<Claims, IError> {
     &DecodingKey::from_secret(secret.as_ref()),
     &Validation::default(),
   )
-  .map_err(|e| IError::ServerError(e.to_string()))?;
+  .map_err(|_| IError::ServerError("Invalid Bearer Token".to_string()))?;
   Ok(decoded_result.claims)
 }

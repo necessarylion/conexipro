@@ -34,7 +34,9 @@ impl FireAuth {
       .map_err(|e| IError::ServerError(e.to_string()))?;
 
     if resp.status() != 200 {
-      return Err(IError::Unauthorized(String::from("Invalid token")));
+      return Err(IError::Unauthorized(String::from(
+        "Invalid firebase id token token",
+      )));
     }
 
     let body = resp.json::<UserInfoResponse>().await.map_err(|e| {
