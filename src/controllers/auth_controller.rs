@@ -1,9 +1,9 @@
 use crate::{
-  errors::handler::IError,
-  models::user::NewUserPayload,
-  repository::user_repo::UserRepo,
-  requests::{extra_requests::ExtraRequests, user_register_request::UserRegisterRequest},
-  utils::{db, firebase::FireAuth, jwt, to_str},
+  models::NewUserPayload,
+  repository::UserRepo,
+  requests::{ExtraRequests, UserRegisterRequest},
+  utils::{firebase::FireAuth, jwt, to_str},
+  DbConn, IError,
 };
 use actix_web::{get, web::Json, HttpRequest, HttpResponse, Responder};
 use serde_json::json;
@@ -24,7 +24,7 @@ pub async fn login_or_register(
   let uid = firebase_user.local_id.as_ref().unwrap();
 
   // get db connection
-  let conn: &mut db::DbConn = &mut req.db_conn()?;
+  let conn: &mut DbConn = &mut req.db_conn()?;
   // check if user exists with uid
   let mut user = UserRepo::get_user_by_uid(conn, uid);
 

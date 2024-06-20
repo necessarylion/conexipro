@@ -1,4 +1,4 @@
-use crate::models::user::User;
+use crate::models::User;
 
 pub struct Auth {
   pub user: User,

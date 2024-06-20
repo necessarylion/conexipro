@@ -1,7 +1,7 @@
 use crate::{
-  errors::handler::IError,
-  models::user::{NewUserPayload, UpdateUserPayload, User},
+  models::{NewUserPayload, UpdateUserPayload, User},
   schema::users::{self, dsl::users as users_dsl},
+  IError,
 };
 use diesel::prelude::*;
 

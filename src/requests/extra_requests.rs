@@ -1,13 +1,9 @@
 use actix_web::{web::Data, HttpRequest};
 
 use crate::{
-  errors::handler::IError,
-  repository::user_repo::UserRepo,
-  utils::{
-    app::AppState,
-    auth::Auth,
-    db::{get_db_conn, DbConn},
-  },
+  repository::UserRepo,
+  utils::{app::AppState, db, Auth},
+  DbConn, IError,
 };
 
 pub trait ExtraRequests {
@@ -31,7 +27,7 @@ impl ExtraRequests for HttpRequest {
 
     if let Some(app_state) = self.app_data::<Data<AppState>>() {
       let pool = &app_state.db_pool;
-      let conn = &mut get_db_conn(pool)?;
+      let conn = &mut db::get_db_conn(pool)?;
       let uid = auth_id.unwrap().to_str().unwrap().to_string();
       let user = UserRepo::get_user_by_uid(conn, &uid)?;
       return Ok(Auth { user });
@@ -41,12 +37,12 @@ impl ExtraRequests for HttpRequest {
 
   /// get database connection from request
   /// ```
-  /// let conn: &mut db::DbConn = &mut req.db_conn()?;
+  /// let conn: &mut DbConn = &mut req.db_conn()?;
   /// ```
   fn db_conn(&self) -> Result<DbConn, IError> {
     if let Some(app_state) = self.app_data::<Data<AppState>>() {
       let pool = &app_state.db_pool;
-      let conn: DbConn = get_db_conn(pool)?;
+      let conn: DbConn = db::get_db_conn(pool)?;
       return Ok(conn);
     }
     return Err(IError::ServerError(String::from("failed to get app state")));

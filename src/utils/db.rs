@@ -5,7 +5,7 @@ use diesel::{
 use r2d2::PooledConnection;
 
 use super::get_env;
-use crate::errors::handler::IError;
+use crate::IError;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
 const MIGRATIONS: EmbeddedMigrations = embed_migrations!();

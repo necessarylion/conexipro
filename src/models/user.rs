@@ -2,6 +2,24 @@ use crate::schema::users;
 use diesel::prelude::*;
 use serde::Serialize;
 
+/// User Modal
+#[derive(Queryable, Selectable, Serialize)]
+#[diesel(table_name = users)]
+#[diesel(check_for_backend(diesel::mysql::Mysql))]
+pub struct User {
+  pub id: u32,
+  pub uid: String,
+  pub username: String,
+  pub email: Option<String>,
+  pub first_name: String,
+  pub middle_name: Option<String>,
+  pub last_name: Option<String>,
+  pub display_name: Option<String>,
+  pub avatar: Option<String>,
+  pub created_at: Option<chrono::NaiveDateTime>,
+  pub updated_at: Option<chrono::NaiveDateTime>,
+}
+
 /// Creating new user payload
 #[derive(Insertable)]
 #[diesel(table_name = users)]
@@ -21,22 +39,4 @@ pub struct UpdateUserPayload<'a> {
   pub last_name: Option<&'a str>,
   pub middle_name: Option<&'a str>,
   pub display_name: Option<&'a str>,
-}
-
-/// User Modal
-#[derive(Queryable, Selectable, Serialize)]
-#[diesel(table_name = users)]
-#[diesel(check_for_backend(diesel::mysql::Mysql))]
-pub struct User {
-  pub id: u32,
-  pub uid: String,
-  pub username: String,
-  pub email: Option<String>,
-  pub first_name: String,
-  pub middle_name: Option<String>,
-  pub last_name: Option<String>,
-  pub display_name: Option<String>,
-  pub avatar: Option<String>,
-  pub created_at: Option<chrono::NaiveDateTime>,
-  pub updated_at: Option<chrono::NaiveDateTime>,
 }

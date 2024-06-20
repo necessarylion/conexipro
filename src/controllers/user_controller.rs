@@ -1,10 +1,7 @@
 use crate::{
-  errors::handler::IError,
-  requests::{
-    extra_requests::ExtraRequests,
-    user_update_request::{ChangeUsernameRequest, UserUpdateRequest},
-  },
-  services::user_service::UserService,
+  requests::{ChangeUsernameRequest, ExtraRequests, UserUpdateRequest},
+  services::UserService,
+  IError,
 };
 use actix_web::{post, put, web::Json, HttpRequest, Responder};
 use validator::Validate;

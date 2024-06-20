@@ -2,7 +2,7 @@ use chrono::{DateTime, Duration, Utc};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
 
-use crate::errors::handler::IError;
+use crate::IError;
 
 use super::get_env;
 

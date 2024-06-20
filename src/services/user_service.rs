@@ -1,22 +1,22 @@
 use serde_json::{json, Value};
 
 use crate::{
-  errors::handler::IError,
-  models::user::{UpdateUserPayload, User},
-  repository::user_repo::UserRepo,
-  requests::user_update_request::{ChangeUsernameRequest, UserUpdateRequest},
-  utils::{auth::Auth, db, to_str},
+  models::{UpdateUserPayload, User},
+  repository::UserRepo,
+  requests::{ChangeUsernameRequest, UserUpdateRequest},
+  utils::{to_str, Auth},
+  DbConn, IError,
 };
 
 pub struct UserService {
-  pub conn: db::DbConn,
+  pub conn: DbConn,
   pub auth: Auth,
 }
 
 impl UserService {
   /// update user data such as names
   pub fn update_user_data(&mut self, payload: UserUpdateRequest) -> Result<User, IError> {
-    let conn: &mut db::DbConn = &mut self.conn;
+    let conn: &mut DbConn = &mut self.conn;
     let auth = &self.auth;
 
     let data = UpdateUserPayload {
@@ -32,7 +32,7 @@ impl UserService {
   /// change username
   pub fn change_user_name(&mut self, payload: ChangeUsernameRequest) -> Result<Value, IError> {
     // get db connection
-    let conn: &mut db::DbConn = &mut self.conn;
+    let conn: &mut DbConn = &mut self.conn;
     let auth = &self.auth;
 
     let username = payload.username.as_ref().unwrap();

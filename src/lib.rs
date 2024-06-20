@@ -8,3 +8,8 @@ pub mod routes;
 pub mod schema;
 pub mod services;
 pub mod utils;
+
+// exports
+pub use errors::IError;
+pub use utils::db::DbConn;
+pub use utils::db::DbPool;

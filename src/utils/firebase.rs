@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
-use crate::errors::handler::IError;
+use crate::IError;
 
 #[derive(Clone, Debug)]
 pub struct FireAuth {
