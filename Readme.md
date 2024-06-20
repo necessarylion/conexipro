@@ -19,10 +19,13 @@ powershell -c "irm https://github.com/diesel-rs/diesel/releases/download/v2.2.1/
 ## Running on development
 
 ```bash
-# Option 1
+# Copy environment variables 
+cp .env.example .env
+
+# Run with option 1
 cargo make dev
 
-# Option 2
+# Run with option 2
 cargo watch -c -w src -x run
 ```
 
@@ -37,6 +40,8 @@ cargo build --release
 ```
 
 ## Migration
+
+***It does not required to run migration on production. However we might need to set `APP_ENV=production` in environment variables.***
 
 ```bash
 # run
@@ -60,4 +65,10 @@ pm2 log conexipro
 
 # check instances
 pm2 list conexipro
+```
+
+## Generate JWT Secret
+
+```bash
+openssl rand -base64 48 | tr -dc 'a-zA-Z0-9' | fold -w 64 | head -n 1
 ```
