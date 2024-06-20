@@ -1,6 +1,8 @@
 <template>
   <div>
     <div id="firebaseui-auth-container"></div>
+    <textarea  v-model="userToken">
+    </textarea>
   </div>
 </template>
 
@@ -9,7 +11,9 @@ import firebaseConfig from "@/utils/firebaseConfig";
 import firebase from 'firebase/compat/app';
 import * as firebaseui from 'firebaseui'
 import 'firebaseui/dist/firebaseui.css'
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
+
+const userToken = ref<string>()
 
 onMounted(async () => {
   firebase.initializeApp(firebaseConfig);
@@ -27,9 +31,18 @@ onMounted(async () => {
     if (user) {
       console.log(user.displayName)
       const token = await user.getIdToken()
-      console.log({token})
+      userToken.value = token
     }
   });
 })
 
 </script>
+
+<style scoped>
+textarea {
+  width: 100%;
+  height: 500px;
+  border: 1px solid black;
+  outline: none;
+}
+</style>

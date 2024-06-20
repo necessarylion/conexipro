@@ -43,3 +43,11 @@ pub fn create_user(conn: &mut MysqlConnection, new_user: NewUser) -> Result<User
     })
     .map_err(|err| IError::ServerError(err.to_string()))
 }
+
+pub fn get_user_by_uid(conn: &mut MysqlConnection, uid: &String) -> Result<User, IError> {
+  users::table
+    .filter(users::uid.eq(uid))
+    .select(User::as_select())
+    .first(conn)
+    .map_err(|err| IError::ServerError(err.to_string()))
+}
