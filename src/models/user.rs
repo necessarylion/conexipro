@@ -101,12 +101,12 @@ pub fn update_username_by_uid(
   uid: &String,
   username: &String,
 ) -> Result<(), IError> {
-  conn
-    .transaction(|conn| {
-      diesel::update(users_dsl.filter(users::uid.eq(uid)))
-        .set(users::username.eq(username))
-        .execute(conn)?;
-      Ok(())
-    })
-    .map_err(|err: diesel::result::Error| IError::ServerError(err.to_string()))
+  let res: Result<usize, diesel::result::Error> =
+    diesel::update(users_dsl.filter(users::uid.eq(uid)))
+      .set(users::username.eq(username))
+      .execute(conn);
+  if res.is_err() {
+    return Err(IError::ServerError(res.err().unwrap().to_string()));
+  }
+  Ok(())
 }
