@@ -1,10 +1,6 @@
 use actix_web::{web::Data, HttpRequest};
 
-use crate::{
-  repository::UserRepo,
-  utils::{app::AppState, db, Auth},
-  DbConn, IError,
-};
+use crate::{repository::UserRepo, utils::db, AppState, Auth, DbConn, IError};
 
 pub trait ExtraRequests {
   fn auth(&self) -> Result<Auth, IError>;

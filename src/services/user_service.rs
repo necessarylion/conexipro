@@ -4,8 +4,8 @@ use crate::{
   models::{UpdateUserPayload, User},
   repository::UserRepo,
   requests::{ChangeUsernameRequest, UserUpdateRequest},
-  utils::{to_str, Auth},
-  DbConn, IError,
+  utils::to_str,
+  Auth, DbConn, IError,
 };
 
 pub struct UserService {

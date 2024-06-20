@@ -6,6 +6,5 @@ pub mod jwt;
 pub mod utils;
 
 // exports
-pub use auth::Auth;
 pub use utils::get_env;
 pub use utils::to_str;

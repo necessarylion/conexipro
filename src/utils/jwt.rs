@@ -8,7 +8,7 @@ use super::get_env;
 
 /// Our claims struct, it needs to derive `Serialize` and/or `Deserialize`
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Claims {
+pub struct JwtClaims {
   pub sub: String,
   pub exp: usize,
 }
@@ -27,7 +27,7 @@ pub fn create(uid: &String) -> Result<JwtToken, IError> {
   // Get the current time and add the expiration duration
   let expired_date: DateTime<Utc> = Utc::now() + exp_duration;
 
-  let claims = Claims {
+  let claims = JwtClaims {
     sub: uid.to_string(),
     exp: expired_date.timestamp() as usize,
   };
@@ -47,9 +47,9 @@ pub fn create(uid: &String) -> Result<JwtToken, IError> {
 }
 
 /// verify jwt token
-pub fn verify(token: String) -> Result<Claims, IError> {
+pub fn verify(token: String) -> Result<JwtClaims, IError> {
   let secret = get_env("JWT_SECRET")?;
-  let decoded_result = decode::<Claims>(
+  let decoded_result = decode::<JwtClaims>(
     &token,
     &DecodingKey::from_secret(secret.as_ref()),
     &Validation::default(),

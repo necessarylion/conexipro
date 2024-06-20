@@ -13,8 +13,8 @@ use actix_web::{
 use conexipro::{
   middleware::{cors::get_cors_config, rate_limit::get_rate_limit_config},
   routes,
-  utils::{app::AppState, db},
-  DbConn, DbPool,
+  utils::db,
+  AppState, DbConn, DbPool,
 };
 
 #[actix_web::main]
