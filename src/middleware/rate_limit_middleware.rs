@@ -3,7 +3,7 @@ use actix_governor::{
   Governor, GovernorConfigBuilder, PeerIpKeyExtractor,
 };
 
-pub fn get_rate_limit_config() -> Governor<PeerIpKeyExtractor, NoOpMiddleware<QuantaInstant>> {
+pub fn handler() -> Governor<PeerIpKeyExtractor, NoOpMiddleware<QuantaInstant>> {
   let brust_size: u32 = 10;
   let per_second: u64 = 2;
 

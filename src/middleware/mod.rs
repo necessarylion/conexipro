@@ -1,3 +1,3 @@
 pub mod auth_middleware;
-pub mod cors;
-pub mod rate_limit;
+pub mod cors_middleware;
+pub mod rate_limit_middleware;

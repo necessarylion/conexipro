@@ -11,7 +11,7 @@ use actix_web::{
 };
 
 use conexipro::{
-  middleware::{cors::get_cors_config, rate_limit::get_rate_limit_config},
+  middleware::{cors_middleware, rate_limit_middleware},
   routes,
   utils::db,
   AppState, DbConn, DbPool,
@@ -38,8 +38,8 @@ async fn main() -> std::io::Result<()> {
 
   HttpServer::new(move || {
     App::new()
-      .wrap(get_cors_config())
-      .wrap(get_rate_limit_config())
+      .wrap(cors_middleware::handler())
+      .wrap(rate_limit_middleware::handler())
       .wrap(Logger::default())
       .wrap(middleware::NormalizePath::new(TrailingSlash::default()))
       .app_data(Data::new(AppState {

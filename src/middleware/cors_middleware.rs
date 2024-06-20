@@ -7,7 +7,7 @@ struct CorsConfig {
   pub origins: Vec<String>,
 }
 
-pub fn get_cors_config() -> Cors {
+pub fn handler() -> Cors {
   // cors configuration
   let cors_config = CorsConfig {
     headers: vec![header::AUTHORIZATION],
