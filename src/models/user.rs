@@ -1,4 +1,7 @@
-use crate::{errors::handler::IError, schema::users};
+use crate::{
+  errors::handler::IError,
+  schema::users::{self, dsl::users as users_dsl},
+};
 use diesel::prelude::*;
 use serde::Serialize;
 
@@ -29,6 +32,15 @@ pub struct NewUser<'a> {
   pub email: Option<&'a str>,
 }
 
+#[derive(Insertable)]
+#[diesel(table_name = users)]
+pub struct UpdateUser<'a> {
+  pub first_name: &'a str,
+  pub last_name: Option<&'a str>,
+  pub middle_name: Option<&'a str>,
+  pub display_name: Option<&'a str>,
+}
+
 pub fn create_user(conn: &mut MysqlConnection, new_user: NewUser) -> Result<User, IError> {
   conn
     .transaction(|conn| {
@@ -49,5 +61,29 @@ pub fn get_user_by_uid(conn: &mut MysqlConnection, uid: &String) -> Result<User,
     .filter(users::uid.eq(uid))
     .select(User::as_select())
     .first(conn)
+    .map_err(|err| IError::ServerError(err.to_string()))
+}
+
+pub fn update_user_by_uid(
+  conn: &mut MysqlConnection,
+  uid: &String,
+  payload: UpdateUser,
+) -> Result<User, IError> {
+  conn
+    .transaction(|conn| {
+      diesel::update(users_dsl.filter(users::uid.eq(uid)))
+        .set((
+          users::first_name.eq(payload.first_name),
+          users::last_name.eq(payload.last_name),
+          users::middle_name.eq(payload.middle_name),
+          users::display_name.eq(payload.display_name),
+        ))
+        .execute(conn)?;
+
+      users::table
+        .filter(users::uid.eq(uid))
+        .select(User::as_select())
+        .first(conn)
+    })
     .map_err(|err| IError::ServerError(err.to_string()))
 }

@@ -1,13 +1,16 @@
 use crate::{
   errors::handler::IError,
-  models::user,
-  requests::user_register_request::UserRegisterRequest,
-  utils::{app::AppState, db, firebase::FireAuth, jwt},
+  models::user::{self, UpdateUser},
+  requests::{
+    auth_request::AuthRequest, user_register_request::UserRegisterRequest,
+    user_update_request::UserUpdateRequest,
+  },
+  utils::{app::AppState, db, firebase::FireAuth, jwt, to_str},
 };
 use actix_web::{
-  delete, get,
+  get, post,
   web::{Data, Json},
-  HttpResponse, Responder,
+  HttpRequest, HttpResponse, Responder,
 };
 use serde_json::json;
 use validator::Validate;
@@ -37,19 +40,19 @@ pub async fn login_or_register(
   if user.is_err() {
     let display_name = firebase_user.display_name.as_ref().unwrap();
     let email = firebase_user.email.as_ref();
-    let email = if email == None { "" } else { email.unwrap() };
+    let email = to_str(email);
     // prepare new user payload
     let new_user = user::NewUser {
       uid: uid,
       username: uid,
       first_name: display_name,
       display_name: display_name,
-      email: Some(email),
+      email: email,
     };
     user = user::create_user(conn, new_user);
   }
 
-  let token = jwt::create_token(uid)?;
+  let token = jwt::create(uid)?;
 
   let response = json!({
     "token": token,
@@ -59,7 +62,7 @@ pub async fn login_or_register(
 
   Ok(
     HttpResponse::Ok()
-      .insert_header(("Authorization", token))
+      .insert_header(("Authorization", token.token))
       .json(response),
   )
 }
@@ -68,22 +71,56 @@ pub async fn login_or_register(
  * fetch user information
  */
 #[get("/auth/user")]
-pub async fn fetch() -> impl Responder {
-  HttpResponse::Ok().body("return user info")
+pub async fn fetch(req: HttpRequest) -> Result<impl Responder, IError> {
+  let auth = req.auth()?;
+  Ok(Json(auth.user))
 }
 
 /**
  * refresh user new token
  */
 #[get("/auth/refresh")]
-pub async fn refresh() -> impl Responder {
-  HttpResponse::Ok().body("return new token")
+pub async fn refresh(req: HttpRequest) -> Result<impl Responder, IError> {
+  let auth = req.auth()?;
+
+  let token = jwt::create(auth.get_uid())?;
+
+  let response = json!({
+    "token": token,
+    "success": true,
+    "user": auth.user,
+  });
+
+  Ok(
+    HttpResponse::Ok()
+      .insert_header(("Authorization", token.token))
+      .json(response),
+  )
 }
 
 /**
- * logout user
+ * update user information
  */
-#[delete("/auth/logout")]
-pub async fn logout() -> impl Responder {
-  HttpResponse::Ok().body("logout user")
+#[post("/auth/user")]
+pub async fn update(
+  req: HttpRequest,
+  payload: Json<UserUpdateRequest>,
+  state: Data<AppState>,
+) -> Result<impl Responder, IError> {
+  payload.validate().map_err(IError::ValidationError)?;
+  let auth = req.auth()?;
+
+  // get db connection
+  let conn: &mut db::DbConn = &mut db::get_db_conn(&state.db_pool)?;
+
+  let data = UpdateUser {
+    first_name: payload.first_name.as_ref().unwrap(),
+    last_name: to_str(payload.last_name.as_ref()),
+    middle_name: to_str(payload.middle_name.as_ref()),
+    display_name: to_str(payload.display_name.as_ref()),
+  };
+
+  let user = user::update_user_by_uid(conn, auth.get_uid(), data)?;
+
+  Ok(Json(user))
 }

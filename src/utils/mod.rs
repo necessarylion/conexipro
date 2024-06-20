@@ -12,3 +12,11 @@ pub fn get_env(key: &str) -> Result<String, IError> {
     env::var(key).map_err(|e| IError::ServerError(format!("{}: {}", key, e.to_string())))?;
   Ok(val)
 }
+
+pub fn to_str(val: Option<&String>) -> Option<&str> {
+  if val == None {
+    None
+  } else {
+    Some(val.unwrap())
+  }
+}
