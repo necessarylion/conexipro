@@ -1,7 +1,11 @@
-use actix_web::web;
+use crate::controllers::auth_controller;
+use actix_web::{web, Scope};
 
-use crate::controllers::home_controller::{api, home};
-
-pub fn get_api_services() -> actix_web::Scope {
-  web::scope("").service(home).service(api)
+pub fn get_api_services() -> Scope {
+  web::scope("api")
+    // authentication services
+    .service(auth_controller::login_or_register)
+    .service(auth_controller::refresh)
+    .service(auth_controller::fetch)
+    .service(auth_controller::logout)
 }

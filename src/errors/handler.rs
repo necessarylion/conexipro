@@ -9,6 +9,7 @@ pub enum IError {
   ValidationError(ValidationErrors),
   ServerError(String),
   NotFoundError(String),
+  Unauthorized(String),
 }
 
 // Implement ResponseError trait, so that it is able to use as response
@@ -19,6 +20,7 @@ impl ResponseError for IError {
       IError::ValidationError(e) => handle_validation_error(&e),
       IError::ServerError(msg) => handle_server_error(&msg),
       IError::NotFoundError(msg) => handle_not_found_error(&msg),
+      IError::Unauthorized(msg) => handle_unauthorized_error(&msg),
     }
   }
 }
@@ -30,10 +32,18 @@ fn handle_validation_error(e: &ValidationErrors) -> HttpResponse {
     .status(StatusCode::UNPROCESSABLE_ENTITY)
     .json(e)
 }
+
 // Handle server errors
 fn handle_server_error(msg: &String) -> HttpResponse {
   HttpResponse::BadRequest()
     .status(StatusCode::INTERNAL_SERVER_ERROR)
+    .json(json!({ "message": msg }))
+}
+
+// Handle auauthorized error
+fn handle_unauthorized_error(msg: &String) -> HttpResponse {
+  HttpResponse::BadRequest()
+    .status(StatusCode::UNAUTHORIZED)
     .json(json!({ "message": msg }))
 }
 
