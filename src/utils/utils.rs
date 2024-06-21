@@ -1,8 +1,5 @@
-use std::env;
-
-use serde::Serializer;
-
 use crate::IError;
+use std::env;
 
 /// get env variable
 /// ```
@@ -26,27 +23,7 @@ pub fn to_str(val: Option<&String>) -> Option<&str> {
   }
 }
 
-/// get app url
-pub fn app_url() -> String {
-  get_env("APP_URL").unwrap_or(String::from(""))
-}
-
-/// get file url
-pub fn get_file_url(file_name: &str) -> String {
-  format!("{}/files/{}", app_url(), file_name)
-}
-
-/// add full file url Serializer method
-pub fn full_file_url<S>(value: &Option<String>, slz: S) -> Result<S::Ok, S::Error>
-where
-  S: Serializer,
-{
-  match value {
-    Some(ref val) => slz.serialize_some(&get_file_url(val)),
-    None => slz.serialize_none(),
-  }
-}
-
+// convert bytes to mb
 pub fn bytes_to_mb(size: usize) -> f64 {
   size as f64 / (1024.0 * 1024.0)
 }

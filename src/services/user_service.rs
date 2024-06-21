@@ -1,17 +1,12 @@
-use std::{borrow::Cow, collections::HashMap};
-
 use actix_multipart::form::tempfile::TempFile;
 use serde_json::{json, Value};
-use validator::{ValidationError, ValidationErrors};
 
 use crate::{
+  app::get_file_url,
   models::{UpdateUserPayload, User},
   repository::UserRepo,
   requests::{ChangeUsernameRequest, UserUpdateRequest},
-  utils::{
-    to_str,
-    utils::{bytes_to_mb, get_file_url},
-  },
+  utils::{to_str, validate_file},
   Auth, DbConn, IError,
 };
 
@@ -40,30 +35,7 @@ impl UserService {
 
   /// update avatar
   pub async fn change_avatar(&mut self, avatar: &TempFile) -> Result<Value, IError> {
-    if avatar.size == 0 {
-      let mut v_err = ValidationErrors::new();
-      let err = ValidationError {
-        code: Cow::from("required"),
-        message: Some(Cow::from("Avatar is required")),
-        params: HashMap::new(),
-      };
-      v_err.add("avatar", err);
-      return Err(IError::ValidationError(v_err));
-    }
-
-    let max_size_in_mb: f64 = 2.0;
-
-    if bytes_to_mb(avatar.size) >= max_size_in_mb {
-      let mut v_err = ValidationErrors::new();
-      let msg = format!("Max file size: {} mb", max_size_in_mb);
-      let err = ValidationError {
-        code: Cow::from("max_size"),
-        message: Some(Cow::from(msg)),
-        params: HashMap::new(),
-      };
-      v_err.add("avatar", err);
-      return Err(IError::ValidationError(v_err));
-    }
+    validate_file("avatar", 2.0, avatar)?;
 
     let file = &mut avatar.file.as_file();
     let content_type = avatar.content_type.as_ref().unwrap().to_string();

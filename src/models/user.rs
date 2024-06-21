@@ -1,4 +1,4 @@
-use crate::{schema::users, utils::full_file_url};
+use crate::{schema::users, serializer::file_url};
 use diesel::prelude::*;
 use serde::Serialize;
 
@@ -15,7 +15,7 @@ pub struct User {
   pub middle_name: Option<String>,
   pub last_name: Option<String>,
   pub display_name: Option<String>,
-  #[serde(serialize_with = "full_file_url")]
+  #[serde(serialize_with = "file_url")]
   pub avatar: Option<String>,
   pub created_at: Option<chrono::NaiveDateTime>,
   pub updated_at: Option<chrono::NaiveDateTime>,

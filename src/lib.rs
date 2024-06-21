@@ -11,7 +11,9 @@ pub mod utils;
 
 // exports
 pub use errors::handler::IError;
+pub use utils::app;
 pub use utils::app::AppState;
 pub use utils::auth::Auth;
 pub use utils::db::DbConn;
 pub use utils::db::DbPool;
+pub use utils::serializer;
