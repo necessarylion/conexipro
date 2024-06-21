@@ -1,5 +1,7 @@
 use std::env;
 
+use serde::Serializer;
+
 use crate::IError;
 
 /// get env variable
@@ -21,5 +23,21 @@ pub fn to_str(val: Option<&String>) -> Option<&str> {
     None
   } else {
     Some(val.unwrap())
+  }
+}
+
+/// get app url
+pub fn app_url() -> String {
+  get_env("APP_URL").unwrap_or(String::from(""))
+}
+
+/// add full file url
+pub fn full_file_url<S>(value: &Option<String>, slz: S) -> Result<S::Ok, S::Error>
+where
+  S: Serializer,
+{
+  match value {
+    Some(ref val) => slz.serialize_some(&format!("{}/files/{}", app_url(), val)),
+    None => slz.serialize_none(),
   }
 }

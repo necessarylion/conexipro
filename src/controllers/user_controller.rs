@@ -1,8 +1,9 @@
 use crate::{
-  requests::{ChangeUsernameRequest, ExtraRequests, UserUpdateRequest},
-  services::UserService,
+  requests::{ChangeAvatarRequest, ChangeUsernameRequest, ExtraRequests, UserUpdateRequest},
+  services::{StorageService, UserService},
   IError,
 };
+use actix_multipart::form::MultipartForm;
 use actix_web::{post, put, web::Json, HttpRequest, Responder};
 use validator::Validate;
 
@@ -46,7 +47,21 @@ pub async fn change_username(
 
 /// change user avatar image
 #[put("/auth/user/avatar")]
-pub async fn change_avatar(req: HttpRequest) -> Result<impl Responder, IError> {
+pub async fn change_avatar(
+  req: HttpRequest,
+  MultipartForm(form): MultipartForm<ChangeAvatarRequest>,
+) -> Result<impl Responder, IError> {
   let auth = req.auth()?;
-  Ok(Json(auth.user))
+  let conn = req.db_conn()?;
+
+  let file = &mut form.avatar.file.as_file();
+  let content_type = form.avatar.content_type.unwrap().to_string();
+
+  let storage = StorageService::new();
+  let avatar = storage.put(file, content_type).await?;
+
+  let mut user_service = UserService { conn, auth };
+  let res = user_service.change_avatar(&avatar)?;
+
+  Ok(Json(res))
 }

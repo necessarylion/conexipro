@@ -70,7 +70,7 @@ impl UserRepo {
       .map_err(|err: diesel::result::Error| IError::ServerError(err.to_string()))
   }
 
-  /// update username only by uid
+  /// update username
   pub fn update_username_by_uid(
     conn: &mut MysqlConnection,
     uid: &String,
@@ -79,6 +79,22 @@ impl UserRepo {
     let res: Result<usize, diesel::result::Error> =
       diesel::update(users_dsl.filter(users::uid.eq(uid)))
         .set(users::username.eq(username))
+        .execute(conn);
+    if res.is_err() {
+      return Err(IError::ServerError(res.err().unwrap().to_string()));
+    }
+    Ok(())
+  }
+
+  /// update user avatar
+  pub fn update_avatar_by_uid(
+    conn: &mut MysqlConnection,
+    uid: &String,
+    avatar: &String,
+  ) -> Result<(), IError> {
+    let res: Result<usize, diesel::result::Error> =
+      diesel::update(users_dsl.filter(users::uid.eq(uid)))
+        .set(users::avatar.eq(avatar))
         .execute(conn);
     if res.is_err() {
       return Err(IError::ServerError(res.err().unwrap().to_string()));

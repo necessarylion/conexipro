@@ -29,6 +29,16 @@ impl UserService {
     UserRepo::update_user_by_uid(conn, auth.uid(), data)
   }
 
+  /// update avatar
+  pub fn change_avatar(&mut self, avatar: &String) -> Result<Value, IError> {
+    let conn: &mut DbConn = &mut self.conn;
+    let auth = &self.auth;
+    UserRepo::update_avatar_by_uid(conn, auth.uid(), avatar)?;
+    Ok(json!({
+      "avatar": avatar
+    }))
+  }
+
   /// change username
   pub fn change_user_name(&mut self, payload: ChangeUsernameRequest) -> Result<Value, IError> {
     // get db connection
