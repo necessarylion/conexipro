@@ -1,7 +1,7 @@
 use crate::{
   requests::{ChangeAvatarRequest, ChangeUsernameRequest, ExtraRequests, UserUpdateRequest},
-  services::{StorageService, UserService},
-  IError,
+  services::UserService,
+  DbConn, IError,
 };
 use actix_multipart::form::MultipartForm;
 use actix_web::{post, put, web::Json, HttpRequest, Responder};
@@ -18,7 +18,7 @@ pub async fn update(
   // get auth
   let auth = req.auth()?;
   // get db connection
-  let conn = req.db_conn()?;
+  let conn: DbConn = req.db_conn()?;
 
   let mut user_service = UserService { conn, auth };
   let res = user_service.update_user_data(payload.into_inner())?;
@@ -52,16 +52,12 @@ pub async fn change_avatar(
   MultipartForm(form): MultipartForm<ChangeAvatarRequest>,
 ) -> Result<impl Responder, IError> {
   let auth = req.auth()?;
-  let conn = req.db_conn()?;
+  let conn: DbConn = req.db_conn()?;
 
-  let file = &mut form.avatar.file.as_file();
-  let content_type = form.avatar.content_type.unwrap().to_string();
-
-  let storage = StorageService::new();
-  let avatar = storage.put(file, content_type).await?;
+  let avatar = form.avatar;
 
   let mut user_service = UserService { conn, auth };
-  let res = user_service.change_avatar(&avatar)?;
+  let res = user_service.change_avatar(&avatar).await?;
 
   Ok(Json(res))
 }

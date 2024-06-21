@@ -1,12 +1,16 @@
+use actix_multipart::form::tempfile::TempFile;
 use serde_json::{json, Value};
+use validator::{ValidationError, ValidationErrors};
 
 use crate::{
   models::{UpdateUserPayload, User},
   repository::UserRepo,
   requests::{ChangeUsernameRequest, UserUpdateRequest},
-  utils::to_str,
+  utils::{to_str, utils::get_file_url},
   Auth, DbConn, IError,
 };
+
+use super::StorageService;
 
 pub struct UserService {
   pub conn: DbConn,
@@ -30,12 +34,31 @@ impl UserService {
   }
 
   /// update avatar
-  pub fn change_avatar(&mut self, avatar: &String) -> Result<Value, IError> {
+  pub async fn change_avatar(&mut self, avatar: &TempFile) -> Result<Value, IError> {
+    if avatar.size == 0 {
+      let mut v_err = ValidationErrors::new();
+      v_err.add("avatar", ValidationError::new("Required avatar file"));
+      return Err(IError::ValidationError(v_err));
+    }
+
+    let file = &mut avatar.file.as_file();
+    let content_type = avatar.content_type.as_ref().unwrap().to_string();
+
+    let storage = StorageService::new();
+    let avatar = storage.put(file, content_type).await?;
+
     let conn: &mut DbConn = &mut self.conn;
     let auth = &self.auth;
-    UserRepo::update_avatar_by_uid(conn, auth.uid(), avatar)?;
+
+    // delete old avatar
+    let old_file = &auth.user.avatar;
+    if old_file.is_some() {
+      storage.delete(old_file.as_ref().unwrap()).await?;
+    }
+
+    UserRepo::update_avatar_by_uid(conn, auth.uid(), &avatar)?;
     Ok(json!({
-      "avatar": avatar
+      "avatar": get_file_url(&avatar)
     }))
   }
 

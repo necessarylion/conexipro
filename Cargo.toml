@@ -30,3 +30,4 @@ aws-sdk-s3 = "1.38.0"
 tokio = { version = "1", features = ["full"] }
 actix-multipart = "0.6.2"
 uuid = {version = "1.8.0", features = ["v4"]}
+mime_guess = "2.0.4"

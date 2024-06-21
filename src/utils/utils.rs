@@ -31,13 +31,18 @@ pub fn app_url() -> String {
   get_env("APP_URL").unwrap_or(String::from(""))
 }
 
-/// add full file url
+/// get file url
+pub fn get_file_url(file_name: &str) -> String {
+  format!("{}/files/{}", app_url(), file_name)
+}
+
+/// add full file url Serializer method
 pub fn full_file_url<S>(value: &Option<String>, slz: S) -> Result<S::Ok, S::Error>
 where
   S: Serializer,
 {
   match value {
-    Some(ref val) => slz.serialize_some(&format!("{}/files/{}", app_url(), val)),
+    Some(ref val) => slz.serialize_some(&get_file_url(val)),
     None => slz.serialize_none(),
   }
 }
