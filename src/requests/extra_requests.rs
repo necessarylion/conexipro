@@ -15,7 +15,7 @@ impl ExtraRequests for HttpRequest {
   fn auth(&self) -> Result<Auth, IError> {
     let headers = self.headers();
     let auth_id = headers.get("x-auth-id");
-    if auth_id == None {
+    if auth_id.is_none() {
       return Err(IError::Unauthorized(String::from(
         "x-auth-id not found in the header",
       )));

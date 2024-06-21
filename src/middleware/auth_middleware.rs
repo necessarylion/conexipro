@@ -14,7 +14,7 @@ pub async fn handler(
   // pre-processing
   let headers = req.headers_mut();
   let token = headers.get("authorization");
-  if token == None {
+  if token.is_none() {
     return Err(actix_web::error::ErrorUnauthorized("required bearer token"));
   }
   let token = token.unwrap().to_str().unwrap().replace("Bearer ", "");
