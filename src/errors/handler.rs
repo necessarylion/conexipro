@@ -1,12 +1,15 @@
+use super::IValidationError;
 use actix_http::StatusCode;
 use actix_web::{HttpResponse, ResponseError};
 use derive_more::Display;
 use serde_json::json;
-use validator::ValidationErrors;
+use std::{borrow::Cow, collections::HashMap};
+use validator::{ValidationError, ValidationErrors};
 
 #[derive(Debug, Display)]
 pub enum IError {
   ValidationError(ValidationErrors),
+  CustomValidatoinError(IValidationError),
   ServerError(String),
   NotFoundError(String),
   Unauthorized(String),
@@ -21,6 +24,7 @@ impl ResponseError for IError {
       IError::ServerError(msg) => handle_server_error(&msg),
       IError::NotFoundError(msg) => handle_not_found_error(&msg),
       IError::Unauthorized(msg) => handle_unauthorized_error(&msg),
+      IError::CustomValidatoinError(err) => handle_custom_validation_error(err),
     }
   }
 }
@@ -52,4 +56,18 @@ fn handle_not_found_error(msg: &String) -> HttpResponse {
   HttpResponse::BadRequest()
     .status(StatusCode::NOT_FOUND)
     .json(json!({ "message": msg }))
+}
+
+// handle custom validation error
+fn handle_custom_validation_error(input: &IValidationError) -> HttpResponse {
+  let mut v_err = ValidationErrors::new();
+  let err = ValidationError {
+    code: Cow::from(input.code.to_string()),
+    message: Some(Cow::from(input.msg.to_string())),
+    params: HashMap::new(),
+  };
+  v_err.add(input.field, err);
+  HttpResponse::BadRequest()
+    .status(StatusCode::UNPROCESSABLE_ENTITY)
+    .json(v_err)
 }
