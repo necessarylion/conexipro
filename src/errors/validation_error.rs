@@ -9,6 +9,10 @@ pub struct IValidationError {
 
 impl fmt::Display for IValidationError {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    write!(f, "VError occurred")
+    write!(
+      f,
+      "IValidationError: [field: {}, message: {}, code: {}]",
+      self.field, self.msg, self.code,
+    )
   }
 }
