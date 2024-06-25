@@ -2,17 +2,21 @@ use crate::{
   models::NewUserPayload,
   repository::UserRepo,
   requests::{ExtraRequests, UserRegisterRequest},
-  utils::{firebase::FireAuth, jwt, to_str},
-  DbConn, IError,
+  utils::{db::get_db_conn, firebase::FireAuth, jwt, to_str},
+  DbConn, DbPool, IError,
 };
-use actix_web::{get, web::Json, HttpRequest, HttpResponse, Responder};
+use actix_web::{
+  get,
+  web::{self, Json},
+  HttpRequest, HttpResponse, Responder,
+};
 use serde_json::json;
 use validator::Validate;
 
 /// user registration.
 /// require firebase token to login
 pub async fn login_or_register(
-  req: HttpRequest,
+  pool: web::Data<DbPool>,
   info: Json<UserRegisterRequest>,
 ) -> Result<impl Responder, IError> {
   info.validate().map_err(IError::ValidationError)?;
@@ -24,7 +28,7 @@ pub async fn login_or_register(
   let uid = firebase_user.local_id.as_ref().unwrap();
 
   // get db connection
-  let conn: &mut DbConn = &mut req.db_conn()?;
+  let conn: &mut DbConn = &mut get_db_conn(&pool)?;
   // check if user exists with uid
   let mut user = UserRepo::get_user_by_uid(conn, uid);
 

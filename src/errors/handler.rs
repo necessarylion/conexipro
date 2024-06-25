@@ -1,6 +1,6 @@
 use super::IValidationError;
 use actix_http::StatusCode;
-use actix_web::{HttpResponse, ResponseError};
+use actix_web::{error::BlockingError, HttpResponse, ResponseError};
 use derive_more::Display;
 use serde_json::json;
 use std::{borrow::Cow, collections::HashMap};
@@ -13,6 +13,12 @@ pub enum IError {
   ServerError(String),
   NotFoundError(String),
   Unauthorized(String),
+}
+
+impl From<BlockingError> for IError {
+  fn from(err: BlockingError) -> IError {
+    IError::ServerError(err.to_string())
+  }
 }
 
 // Implement ResponseError trait, so that it is able to use as response

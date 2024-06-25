@@ -14,7 +14,7 @@ use conexipro::{
   middleware::{cors_middleware, rate_limit_middleware},
   routes,
   utils::db,
-  AppState, DbConn, DbPool,
+  DbConn, DbPool,
 };
 
 #[actix_web::main]
@@ -42,9 +42,7 @@ async fn main() -> std::io::Result<()> {
       .wrap(rate_limit_middleware::handler())
       .wrap(Logger::default())
       .wrap(middleware::NormalizePath::new(TrailingSlash::default()))
-      .app_data(Data::new(AppState {
-        db_pool: pool.clone(),
-      }))
+      .app_data(Data::new(pool.clone()))
       .service(routes::get_api_services())
   })
   .bind(("127.0.0.1", port))?
