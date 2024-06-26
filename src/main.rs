@@ -1,24 +1,21 @@
 extern crate conexipro;
-
-use dotenv::dotenv;
-use env_logger::Env;
-use std::env;
-
 use actix_web::{
   middleware::{self, Logger, TrailingSlash},
   web::Data,
   App, HttpServer,
 };
-
 use conexipro::{
   middleware::{cors_middleware, rate_limit_middleware},
   routes,
-  utils::db,
+  utils::db::{self, get_normal_db_connection},
   DbPool,
 };
+use dotenv::dotenv;
+use env_logger::Env;
+use std::{env, io::Result};
 
 #[actix_web::main]
-async fn main() -> std::io::Result<()> {
+async fn main() -> Result<()> {
   // load env variables
   dotenv().ok();
 
@@ -32,6 +29,9 @@ async fn main() -> std::io::Result<()> {
   log::info!("Server running at http://{}:{}", "127.0.0.1", port);
 
   let pool: DbPool = db::get_db_pool();
+
+  let mut conn = get_normal_db_connection();
+  db::run_db_migrations(&mut conn);
 
   HttpServer::new(move || {
     App::new()

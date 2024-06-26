@@ -1,4 +1,5 @@
 use super::get_env;
+use diesel::{Connection, MysqlConnection};
 use diesel_async::pooled_connection::AsyncDieselConnectionManager;
 use diesel_async::{pooled_connection::deadpool::Pool, AsyncMysqlConnection};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
@@ -10,7 +11,13 @@ pub type DbPool = Pool<AsyncMysqlConnection>;
 pub fn get_db_pool() -> DbPool {
   let url = get_env("DATABASE_URL").unwrap();
   let config = AsyncDieselConnectionManager::<diesel_async::AsyncMysqlConnection>::new(url);
-  Pool::builder(config).build().unwrap()
+  Pool::builder(config).max_size(20).build().unwrap()
+}
+
+/// get normal db connection for migration
+pub fn get_normal_db_connection() -> MysqlConnection {
+  let url = get_env("DATABASE_URL").unwrap();
+  MysqlConnection::establish(&url).unwrap_or_else(|_| panic!("Error connecting to {}", url))
 }
 
 /// run database migration in PRODUCTION ONLY
