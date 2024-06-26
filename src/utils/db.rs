@@ -1,37 +1,16 @@
-use std::sync::Arc;
-
-use diesel::{
-  r2d2::{ConnectionManager, Pool},
-  MysqlConnection,
-};
-use r2d2::PooledConnection;
-
 use super::get_env;
-use crate::IError;
+use diesel_async::pooled_connection::AsyncDieselConnectionManager;
+use diesel_async::{pooled_connection::deadpool::Pool, AsyncMysqlConnection};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
 const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
-pub type DbPool = Pool<ConnectionManager<MysqlConnection>>;
-pub type DbConn = PooledConnection<ConnectionManager<MysqlConnection>>;
+pub type DbPool = Pool<AsyncMysqlConnection>;
 
 /// get database connection pool to use in main and add to web services
 pub fn get_db_pool() -> DbPool {
   let url = get_env("DATABASE_URL").unwrap();
-  let manager = ConnectionManager::<MysqlConnection>::new(url);
-  Pool::builder()
-    .test_on_check_out(true)
-    .build(manager)
-    .expect("Could not build connection pool")
-}
-
-///get database connection from pool
-/// ```
-/// let conn: &mut DbConn = get_db_conn(pool);
-/// ```
-pub fn get_db_conn(pool: &Arc<DbPool>) -> Result<DbConn, IError> {
-  pool
-    .get()
-    .map_err(|err| IError::ServerError(err.to_string()))
+  let config = AsyncDieselConnectionManager::<diesel_async::AsyncMysqlConnection>::new(url);
+  Pool::builder(config).build().unwrap()
 }
 
 /// run database migration in PRODUCTION ONLY

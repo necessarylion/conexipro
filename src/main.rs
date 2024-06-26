@@ -14,7 +14,7 @@ use conexipro::{
   middleware::{cors_middleware, rate_limit_middleware},
   routes,
   utils::db,
-  DbConn, DbPool,
+  DbPool,
 };
 
 #[actix_web::main]
@@ -32,9 +32,6 @@ async fn main() -> std::io::Result<()> {
   log::info!("Server running at http://{}:{}", "127.0.0.1", port);
 
   let pool: DbPool = db::get_db_pool();
-  let conn: &mut DbConn = &mut pool.get().unwrap();
-
-  db::run_db_migrations(conn);
 
   HttpServer::new(move || {
     App::new()

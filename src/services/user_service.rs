@@ -1,7 +1,6 @@
 use std::sync::Arc;
 
 use actix_multipart::form::tempfile::TempFile;
-use actix_web::web;
 use serde_json::{json, Value};
 
 use crate::{
@@ -9,8 +8,8 @@ use crate::{
   models::{UpdateUserPayload, User},
   repository::UserRepo,
   requests::{ChangeUsernameRequest, UserUpdateRequest},
-  utils::{db::get_db_conn, to_str, validate_file},
-  Auth, DbConn, DbPool, IError,
+  utils::{to_str, validate_file},
+  Auth, DbPool, IError,
 };
 
 use super::StorageService;
@@ -24,21 +23,15 @@ impl UserService {
   /// update user data such as names
   pub async fn update_user_data(&mut self, payload: UserUpdateRequest) -> Result<User, IError> {
     let auth = &self.auth;
-    web::block({
-      let pool = self.pool.clone();
-      let uid = auth.uid().clone();
-      move || {
-        let conn: &mut DbConn = &mut get_db_conn(&pool)?;
-        let data = UpdateUserPayload {
-          first_name: payload.first_name.as_ref().unwrap(),
-          last_name: to_str(payload.last_name.as_ref()),
-          middle_name: to_str(payload.middle_name.as_ref()),
-          display_name: to_str(payload.display_name.as_ref()),
-        };
-        UserRepo::update_user_by_uid(conn, &uid, data)
-      }
-    })
-    .await?
+    let uid = auth.uid();
+    let conn = &mut self.pool.get().await.unwrap();
+    let data = UpdateUserPayload {
+      first_name: payload.first_name.as_ref().unwrap(),
+      last_name: to_str(payload.last_name.as_ref()),
+      middle_name: to_str(payload.middle_name.as_ref()),
+      display_name: to_str(payload.display_name.as_ref()),
+    };
+    UserRepo::update_user_by_uid(conn, &uid, data).await
   }
 
   /// update avatar
@@ -51,7 +44,7 @@ impl UserService {
     let storage = StorageService::new();
     let avatar = storage.put(file, content_type).await?;
 
-    let conn: &mut DbConn = &mut get_db_conn(&self.pool)?;
+    let conn = &mut self.pool.get().await.unwrap();
     let auth = &self.auth;
     let user = auth.user(&self.pool).await?;
 
@@ -61,21 +54,24 @@ impl UserService {
       storage.delete(old_file.as_ref().unwrap()).await?;
     }
 
-    UserRepo::update_avatar_by_uid(conn, auth.uid(), &avatar)?;
+    UserRepo::update_avatar_by_uid(conn, auth.uid(), &avatar).await?;
     Ok(json!({
       "avatar": get_file_url(&avatar)
     }))
   }
 
   /// change username
-  pub fn change_user_name(&mut self, payload: ChangeUsernameRequest) -> Result<Value, IError> {
+  pub async fn change_user_name(
+    &mut self,
+    payload: ChangeUsernameRequest,
+  ) -> Result<Value, IError> {
     let auth = &self.auth;
 
     let username = payload.username.as_ref().unwrap();
 
     // get db connection
-    let conn: &mut DbConn = &mut get_db_conn(&self.pool)?;
-    let user = UserRepo::get_user_by_username(conn, username);
+    let conn = &mut self.pool.get().await.unwrap();
+    let user = UserRepo::get_user_by_username(conn, username).await;
 
     let success = json!({
       "success": true
@@ -84,7 +80,7 @@ impl UserService {
     // if record do not found, the function will return error.
     // which mean username is not taken and able to change.
     if user.is_err() {
-      UserRepo::update_username_by_uid(conn, auth.uid(), username)?;
+      UserRepo::update_username_by_uid(conn, auth.uid(), username).await?;
       return Ok(success);
     }
 

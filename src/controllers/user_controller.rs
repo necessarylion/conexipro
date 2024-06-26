@@ -45,7 +45,7 @@ pub async fn change_username(
     pool: pool.into_inner(),
     auth,
   };
-  let res = user_service.change_user_name(payload.into_inner())?;
+  let res = user_service.change_user_name(payload.into_inner()).await?;
   return Ok(Json(res));
 }
 
