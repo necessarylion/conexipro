@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
   // log server running port info
   log::info!("Server running at http://{}:{}", "127.0.0.1", port);
 
-  let pool: DbPool = db::get_db_pool();
+  let pool: DbPool = db::get_db_pool().await;
 
   let mut conn = get_normal_db_connection();
   db::run_db_migrations(&mut conn);

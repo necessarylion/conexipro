@@ -3,7 +3,7 @@ use crate::{
   schema::users::{self, dsl::users as users_dsl},
   IError,
 };
-use diesel::{dsl::sql, prelude::*, sql_types::Bool};
+use diesel::prelude::*;
 use diesel_async::AsyncMysqlConnection;
 use diesel_async::RunQueryDsl;
 

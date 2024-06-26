@@ -1,17 +1,22 @@
 use super::get_env;
 use diesel::{Connection, MysqlConnection};
 use diesel_async::pooled_connection::AsyncDieselConnectionManager;
-use diesel_async::{pooled_connection::deadpool::Pool, AsyncMysqlConnection};
+use diesel_async::{pooled_connection::bb8::Pool, AsyncMysqlConnection};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
 const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
 pub type DbPool = Pool<AsyncMysqlConnection>;
 
 /// get database connection pool to use in main and add to web services
-pub fn get_db_pool() -> DbPool {
+pub async fn get_db_pool() -> DbPool {
   let url = get_env("DATABASE_URL").unwrap();
-  let config = AsyncDieselConnectionManager::<diesel_async::AsyncMysqlConnection>::new(url);
-  Pool::builder(config).max_size(20).build().unwrap()
+  let config = AsyncDieselConnectionManager::<AsyncMysqlConnection>::new(url);
+  Pool::builder()
+    .max_size(20)
+    .min_idle(5)
+    .build(config)
+    .await
+    .unwrap()
 }
 
 /// get normal db connection for migration
