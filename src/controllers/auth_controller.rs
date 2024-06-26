@@ -2,7 +2,11 @@ use crate::{
   models::NewUserPayload,
   repository::UserRepo,
   requests::{ExtraRequests, UserRegisterRequest},
-  utils::{firebase::FireAuth, jwt, to_str},
+  utils::{
+    db::{get_db_conn, DbConn},
+    firebase::FireAuth,
+    jwt, to_str,
+  },
   DbPool, IError,
 };
 use actix_web::{
@@ -29,7 +33,7 @@ pub async fn login_or_register(
 
   // get db connec
   let uid = uid.clone();
-  let conn = &mut pool.get().await.unwrap();
+  let conn: &mut DbConn = &mut get_db_conn(&pool).await?;
 
   // check if user exists with uid
   let mut user = UserRepo::get_user_by_uid(conn, &uid).await;

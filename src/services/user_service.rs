@@ -8,7 +8,10 @@ use crate::{
   models::{UpdateUserPayload, User},
   repository::UserRepo,
   requests::{ChangeUsernameRequest, UserUpdateRequest},
-  utils::{to_str, validate_file},
+  utils::{
+    db::{get_db_conn, DbConn},
+    to_str, validate_file,
+  },
   Auth, DbPool, IError,
 };
 
@@ -24,7 +27,7 @@ impl UserService {
   pub async fn update_user_data(&mut self, payload: UserUpdateRequest) -> Result<User, IError> {
     let auth = &self.auth;
     let uid = auth.uid();
-    let conn = &mut self.pool.get().await.unwrap();
+    let conn: &mut DbConn = &mut get_db_conn(&self.pool).await?;
     let data = UpdateUserPayload {
       first_name: payload.first_name.as_ref().unwrap(),
       last_name: to_str(payload.last_name.as_ref()),
@@ -44,7 +47,7 @@ impl UserService {
     let storage = StorageService::new();
     let avatar = storage.put(file, content_type).await?;
 
-    let conn = &mut self.pool.get().await.unwrap();
+    let conn: &mut DbConn = &mut get_db_conn(&self.pool).await?;
     let auth = &self.auth;
     let user = auth.user(&self.pool).await?;
 
@@ -70,7 +73,7 @@ impl UserService {
     let username = payload.username.as_ref().unwrap();
 
     // get db connection
-    let conn = &mut self.pool.get().await.unwrap();
+    let conn: &mut DbConn = &mut get_db_conn(&self.pool).await?;
     let user = UserRepo::get_user_by_username(conn, username).await;
 
     let success = json!({

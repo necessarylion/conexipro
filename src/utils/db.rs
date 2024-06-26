@@ -1,4 +1,9 @@
+use std::sync::Arc;
+
+use crate::IError;
+
 use super::get_env;
+use bb8::PooledConnection;
 use diesel::{Connection, MysqlConnection};
 use diesel_async::pooled_connection::AsyncDieselConnectionManager;
 use diesel_async::{pooled_connection::bb8::Pool, AsyncMysqlConnection};
@@ -6,6 +11,7 @@ use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
 const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
 pub type DbPool = Pool<AsyncMysqlConnection>;
+pub type DbConn<'a> = PooledConnection<'a, AsyncDieselConnectionManager<AsyncMysqlConnection>>;
 
 /// get database connection pool to use in main and add to web services
 pub async fn get_db_pool() -> DbPool {
@@ -17,6 +23,13 @@ pub async fn get_db_pool() -> DbPool {
     .build(config)
     .await
     .unwrap()
+}
+
+pub async fn get_db_conn(pool: &Arc<DbPool>) -> Result<DbConn, IError> {
+  pool
+    .get()
+    .await
+    .map_err(|err| IError::ServerError(err.to_string()))
 }
 
 /// get normal db connection for migration
