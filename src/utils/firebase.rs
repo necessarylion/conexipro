@@ -71,6 +71,12 @@ pub struct FirebaseUser {
   pub display_name: Option<String>,
 }
 
+impl FirebaseUser {
+  pub fn get_uid(&self) -> String {
+    self.local_id.as_ref().unwrap().to_string()
+  }
+}
+
 // Provider User Info
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

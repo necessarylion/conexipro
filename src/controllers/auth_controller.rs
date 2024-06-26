@@ -7,7 +7,7 @@ use crate::{
 };
 use actix_web::{
   get,
-  web::{self, Json},
+  web::{self, Data, Json},
   HttpRequest, HttpResponse, Responder,
 };
 use serde_json::json;
@@ -16,7 +16,7 @@ use validator::Validate;
 /// user registration.
 /// require firebase token to login
 pub async fn login_or_register(
-  pool: web::Data<DbPool>,
+  pool: Data<DbPool>,
   info: Json<UserRegisterRequest>,
 ) -> Result<impl Responder, IError> {
   info.validate().map_err(IError::ValidationError)?;
@@ -25,30 +25,38 @@ pub async fn login_or_register(
   let id_token = info.token.as_ref();
   let auth = FireAuth::new();
   let firebase_user = auth.get_user_info(id_token).await?;
-  let uid = firebase_user.local_id.as_ref().unwrap();
+  let uid = firebase_user.get_uid();
 
-  // get db connection
-  let conn: &mut DbConn = &mut get_db_conn(&pool)?;
-  // check if user exists with uid
-  let mut user = UserRepo::get_user_by_uid(conn, uid);
+  let user = web::block({
+    let uid = uid.clone();
+    move || {
+      // get db connection
+      let conn: &mut DbConn = &mut get_db_conn(&pool)?;
+      // check if user exists with uid
+      let user = UserRepo::get_user_by_uid(conn, &uid);
 
-  // if not exist create new one
-  if user.is_err() {
-    let display_name = firebase_user.display_name.as_ref().unwrap();
-    let email = firebase_user.email.as_ref();
-    let email = to_str(email);
-    // prepare new user payload
-    let new_user = NewUserPayload {
-      uid: uid,
-      username: uid,
-      first_name: display_name,
-      display_name: display_name,
-      email: email,
-    };
-    user = UserRepo::create_user(conn, new_user);
-  }
+      // if not exist create new one
+      if user.is_err() {
+        let display_name = firebase_user.display_name.as_ref().unwrap();
+        let email = firebase_user.email.as_ref();
+        let email = to_str(email);
+        // prepare new user payload
+        let new_user = NewUserPayload {
+          uid: &uid,
+          username: &uid,
+          first_name: display_name,
+          display_name,
+          email,
+        };
+        UserRepo::create_user(conn, new_user)
+      } else {
+        user
+      }
+    }
+  })
+  .await?;
 
-  let token = jwt::create(uid)?;
+  let token = jwt::create(&uid)?;
 
   let response = json!({
     "token": token,
@@ -65,22 +73,22 @@ pub async fn login_or_register(
 
 /// fetch user information
 #[get("/auth/user")]
-pub async fn fetch(req: HttpRequest) -> Result<impl Responder, IError> {
+pub async fn fetch(req: HttpRequest, pool: Data<DbPool>) -> Result<impl Responder, IError> {
   let auth = req.auth()?;
-  Ok(Json(auth.user))
+  let user = auth.user(&pool).await?;
+  Ok(Json(user))
 }
 
 /// refresh user new token
 #[get("/auth/refresh")]
-pub async fn refresh(req: HttpRequest) -> Result<impl Responder, IError> {
+pub async fn refresh(req: HttpRequest, pool: Data<DbPool>) -> Result<impl Responder, IError> {
   let auth = req.auth()?;
-
   let token = jwt::create(auth.uid())?;
-
+  let user = auth.user(&pool).await?;
   let response = json!({
     "token": token,
     "success": true,
-    "user": auth.user,
+    "user": user,
   });
 
   Ok(

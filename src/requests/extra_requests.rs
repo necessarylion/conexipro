@@ -1,6 +1,6 @@
-use actix_web::{web::Data, HttpRequest};
+use actix_web::HttpRequest;
 
-use crate::{repository::UserRepo, utils::db, Auth, DbConn, DbPool, IError};
+use crate::{Auth, IError};
 
 pub trait ExtraRequests {
   fn auth(&self) -> Result<Auth, IError>;
@@ -20,12 +20,7 @@ impl ExtraRequests for HttpRequest {
       )));
     }
 
-    if let Some(pool) = self.app_data::<Data<DbPool>>() {
-      let conn: &mut DbConn = &mut db::get_db_conn(&pool)?;
-      let uid = auth_id.unwrap().to_str().unwrap().to_string();
-      let user = UserRepo::get_user_by_uid(conn, &uid)?;
-      return Ok(Auth { user });
-    }
-    return Err(IError::ServerError(String::from("failed to get app state")));
+    let uid = auth_id.unwrap().to_str().unwrap().to_string();
+    return Ok(Auth { user_uid: uid });
   }
 }

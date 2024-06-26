@@ -1,4 +1,7 @@
+use std::sync::Arc;
+
 use actix_multipart::form::tempfile::TempFile;
+use actix_web::web;
 use serde_json::{json, Value};
 
 use crate::{
@@ -6,31 +9,36 @@ use crate::{
   models::{UpdateUserPayload, User},
   repository::UserRepo,
   requests::{ChangeUsernameRequest, UserUpdateRequest},
-  utils::{to_str, validate_file},
-  Auth, DbConn, IError,
+  utils::{db::get_db_conn, to_str, validate_file},
+  Auth, DbConn, DbPool, IError,
 };
 
 use super::StorageService;
 
 pub struct UserService {
-  pub conn: DbConn,
+  pub pool: Arc<DbPool>,
   pub auth: Auth,
 }
 
 impl UserService {
   /// update user data such as names
-  pub fn update_user_data(&mut self, payload: UserUpdateRequest) -> Result<User, IError> {
-    let conn: &mut DbConn = &mut self.conn;
+  pub async fn update_user_data(&mut self, payload: UserUpdateRequest) -> Result<User, IError> {
     let auth = &self.auth;
-
-    let data = UpdateUserPayload {
-      first_name: payload.first_name.as_ref().unwrap(),
-      last_name: to_str(payload.last_name.as_ref()),
-      middle_name: to_str(payload.middle_name.as_ref()),
-      display_name: to_str(payload.display_name.as_ref()),
-    };
-
-    UserRepo::update_user_by_uid(conn, auth.uid(), data)
+    web::block({
+      let pool = self.pool.clone();
+      let uid = auth.uid().clone();
+      move || {
+        let conn: &mut DbConn = &mut get_db_conn(&pool)?;
+        let data = UpdateUserPayload {
+          first_name: payload.first_name.as_ref().unwrap(),
+          last_name: to_str(payload.last_name.as_ref()),
+          middle_name: to_str(payload.middle_name.as_ref()),
+          display_name: to_str(payload.display_name.as_ref()),
+        };
+        UserRepo::update_user_by_uid(conn, &uid, data)
+      }
+    })
+    .await?
   }
 
   /// update avatar
@@ -43,11 +51,12 @@ impl UserService {
     let storage = StorageService::new();
     let avatar = storage.put(file, content_type).await?;
 
-    let conn: &mut DbConn = &mut self.conn;
+    let conn: &mut DbConn = &mut get_db_conn(&self.pool)?;
     let auth = &self.auth;
+    let user = auth.user(&self.pool).await?;
 
     // delete old avatar
-    let old_file = &auth.user.avatar;
+    let old_file = user.avatar;
     if old_file.is_some() {
       storage.delete(old_file.as_ref().unwrap()).await?;
     }
@@ -60,12 +69,12 @@ impl UserService {
 
   /// change username
   pub fn change_user_name(&mut self, payload: ChangeUsernameRequest) -> Result<Value, IError> {
-    // get db connection
-    let conn: &mut DbConn = &mut self.conn;
     let auth = &self.auth;
 
     let username = payload.username.as_ref().unwrap();
 
+    // get db connection
+    let conn: &mut DbConn = &mut get_db_conn(&self.pool)?;
     let user = UserRepo::get_user_by_username(conn, username);
 
     let success = json!({
@@ -83,7 +92,7 @@ impl UserService {
 
     // if found user and auth user is the same,
     // no need to do since it is the same username
-    if user.id == auth.user.id {
+    if &user.uid == auth.uid() {
       return Ok(success);
     }
 

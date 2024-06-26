@@ -1,8 +1,7 @@
 use crate::{
   requests::{ChangeAvatarRequest, ChangeUsernameRequest, ExtraRequests, UserUpdateRequest},
   services::UserService,
-  utils::db::get_db_conn,
-  DbConn, DbPool, IError,
+  DbPool, IError,
 };
 use actix_multipart::form::MultipartForm;
 use actix_web::{
@@ -23,14 +22,11 @@ pub async fn update(
   payload.validate().map_err(IError::ValidationError)?;
   // get auth
   let auth = req.auth()?;
-
-  let res = web::block(move || {
-    let conn: DbConn = get_db_conn(&pool)?;
-    let mut user_service = UserService { conn, auth };
-    user_service.update_user_data(payload.into_inner())
-  })
-  .await??;
-
+  let mut user_service = UserService {
+    pool: pool.into_inner(),
+    auth,
+  };
+  let res = user_service.update_user_data(payload.into_inner()).await?;
   Ok(Json(res))
 }
 
@@ -45,14 +41,11 @@ pub async fn change_username(
   payload.validate().map_err(IError::ValidationError)?;
   // get auth
   let auth = req.auth()?;
-
-  let res = web::block(move || {
-    let conn: DbConn = get_db_conn(&pool)?;
-    let mut user_service = UserService { conn, auth };
-    user_service.change_user_name(payload.into_inner())
-  })
-  .await??;
-
+  let mut user_service = UserService {
+    pool: pool.into_inner(),
+    auth,
+  };
+  let res = user_service.change_user_name(payload.into_inner())?;
   return Ok(Json(res));
 }
 
@@ -64,9 +57,11 @@ pub async fn change_avatar(
   MultipartForm(form): MultipartForm<ChangeAvatarRequest>,
 ) -> Result<impl Responder, IError> {
   let auth = req.auth()?;
-  let conn: DbConn = get_db_conn(&pool)?;
   let avatar = form.avatar;
-  let mut user_service = UserService { conn, auth };
+  let mut user_service = UserService {
+    pool: pool.into_inner(),
+    auth,
+  };
   let res = user_service.change_avatar(&avatar).await?;
   Ok(Json(res))
 }

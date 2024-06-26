@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use diesel::{
   r2d2::{ConnectionManager, Pool},
   MysqlConnection,
@@ -26,7 +28,7 @@ pub fn get_db_pool() -> DbPool {
 /// ```
 /// let conn: &mut DbConn = get_db_conn(pool);
 /// ```
-pub fn get_db_conn(pool: &DbPool) -> Result<DbConn, IError> {
+pub fn get_db_conn(pool: &Arc<DbPool>) -> Result<DbConn, IError> {
   pool
     .get()
     .map_err(|err| IError::ServerError(err.to_string()))
