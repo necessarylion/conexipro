@@ -7,6 +7,10 @@
 command = "cargo"
 args = ["watch", "-c", "-w", "src", "-x", "run"]
 
+[tasks.build]
+command = "cargo"
+args = ["build", "--release"]
+
 # cargo make migrate
 [tasks.migrate]
 command = "diesel"
