@@ -1,7 +1,7 @@
 use chrono::{DateTime, Duration, Utc};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
-use utoipa::{openapi::schema, ToSchema};
+use utoipa::ToSchema;
 
 use crate::IError;
 
