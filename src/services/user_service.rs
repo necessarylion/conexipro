@@ -1,39 +1,39 @@
-use actix_multipart::form::tempfile::TempFile;
 use std::sync::Arc;
 
+use super::StorageService;
 use crate::{
   app::get_file_url,
-  models::{UpdateUserPayload, User},
-  repository::UserRepo,
-  requests::{ChangeUsernameRequest, UserUpdateRequest},
-  response::{ChangeAvatarResponse, ChangeUsernameResponse},
+  models::{user_info::NewUserInfoPayload, UpdateUserPayload, User},
+  repository::{UserInfoRepo, UserRepo},
+  requests::{ChangeUsernameRequest, UserInfoUpdateRequest, UserUpdateRequest},
+  response::{ChangeAvatarResponse, ChangeUsernameResponse, UserDetailResponse},
   utils::{
     db::{get_db_conn, DbConn},
-    to_str, validate_file,
+    validate_file, SomeStr, StrWithDefault,
   },
   Auth, DbPool, IError,
 };
-
-use super::StorageService;
+use actix_multipart::form::tempfile::TempFile;
+use actix_web::web::Data;
 
 pub struct UserService {
-  pub pool: Arc<DbPool>,
-  pub auth: Auth,
+  pub pool: Data<DbPool>,
+  pub auth: Arc<Auth>,
 }
 
 impl UserService {
   /// update user data such as names
   pub async fn update_user_data(&mut self, payload: UserUpdateRequest) -> Result<User, IError> {
     let auth = &self.auth;
-    let uid = auth.uid();
+    let id = auth.id();
     let conn: &mut DbConn = &mut get_db_conn(&self.pool).await?;
     let data = UpdateUserPayload {
-      first_name: payload.first_name.as_ref().unwrap(),
-      last_name: to_str(payload.last_name.as_ref()),
-      middle_name: to_str(payload.middle_name.as_ref()),
-      display_name: to_str(payload.display_name.as_ref()),
+      first_name: StrWithDefault(payload.first_name.as_ref(), ""),
+      last_name: SomeStr(payload.last_name.as_ref()),
+      middle_name: SomeStr(payload.middle_name.as_ref()),
+      display_name: SomeStr(payload.display_name.as_ref()),
     };
-    UserRepo::update_user_by_uid(conn, &uid, data).await
+    UserRepo::update_user_by_id(conn, id, data).await
   }
 
   /// update avatar
@@ -56,7 +56,7 @@ impl UserService {
       storage.delete(old_file.as_ref().unwrap()).await?;
     }
 
-    UserRepo::update_avatar_by_uid(conn, auth.uid(), &avatar).await?;
+    UserRepo::update_avatar_by_id(conn, auth.id(), &avatar).await?;
     Ok(ChangeAvatarResponse {
       avatar: get_file_url(&avatar),
     })
@@ -83,7 +83,7 @@ impl UserService {
     // if record do not found, the function will return error.
     // which mean username is not taken and able to change.
     if user.is_err() {
-      UserRepo::update_username_by_uid(conn, auth.uid(), username).await?;
+      UserRepo::update_username_by_id(conn, auth.id(), username).await?;
       return Ok(success);
     }
 
@@ -91,7 +91,7 @@ impl UserService {
 
     // if found user and auth user is the same,
     // no need to do since it is the same username
-    if &user.uid == auth.uid() {
+    if &user.id == auth.id() {
       return Ok(success);
     }
 
@@ -101,5 +101,40 @@ impl UserService {
       success: false,
       message: format!("username {} is already taken", username),
     })
+  }
+
+  /// delte and insert user infos
+  pub async fn update_user_info(
+    &mut self,
+    payload: UserInfoUpdateRequest,
+  ) -> Result<UserDetailResponse, IError> {
+    let user_id = self.auth.id();
+    let conn: &mut DbConn = &mut get_db_conn(&self.pool).await?;
+
+    // create payload to insert with array into db
+    let mut records: Vec<NewUserInfoPayload> = Vec::new();
+    // this line is important to prvent borrow error
+    let infos = payload.infos.unwrap_or(Vec::new());
+
+    for info in infos.iter() {
+      let payload: NewUserInfoPayload = NewUserInfoPayload {
+        user_id,
+        info_key: StrWithDefault(info.info_key.as_ref(), ""),
+        info_value: SomeStr(info.info_value.as_ref()),
+        info_type: StrWithDefault(info.info_type.as_ref(), "contact"),
+      };
+      records.push(payload);
+    }
+
+    // delete old infos
+    UserInfoRepo::delete_infos_by_user_id(conn, user_id).await?;
+
+    // insert new infos
+    UserInfoRepo::insert_infos(conn, &records).await?;
+
+    // get user detail and infos
+    let user = self.auth.user(&self.pool).await?;
+    let infos = user.infos(conn).await?;
+    Ok(UserDetailResponse { user, infos })
   }
 }

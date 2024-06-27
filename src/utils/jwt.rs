@@ -25,7 +25,7 @@ pub struct JwtToken {
 }
 
 /// create jwt token by usring user uid
-pub fn create(uid: &String) -> Result<JwtToken, IError> {
+pub fn create(uid: &u32) -> Result<JwtToken, IError> {
   let exp_duration = Duration::days(5);
 
   // Get the current time and add the expiration duration

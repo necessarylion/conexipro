@@ -12,14 +12,28 @@ pub fn get_env(key: &str) -> Result<String, IError> {
 }
 
 /// convert Option<&String> to Option<&str>
+/// this will return None value if val is none
 /// ```
 /// let val = to_str(payload.last_name.as_ref())
 /// ```
-pub fn to_str(val: Option<&String>) -> Option<&str> {
+pub fn some_str(val: Option<&String>) -> Option<&str> {
   if val.is_none() {
     None
   } else {
     Some(val.unwrap())
+  }
+}
+
+/// convert Option<&'a String> to &'a str
+/// this will return default value if val is none
+/// ```
+/// let val = str_default(payload.last_name.as_ref(), "default")
+/// ```
+pub fn str_default<'a>(val: Option<&'a String>, default: &'a str) -> &'a str {
+  if val.is_none() {
+    default
+  } else {
+    val.unwrap()
   }
 }
 

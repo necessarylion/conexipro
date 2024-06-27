@@ -20,9 +20,13 @@ impl UserRepo {
       .execute(conn)
       .await
       .map_err(|err| IError::ServerError(err.to_string()))?;
+    UserRepo::get_user_by_uid(conn, &new_user.uid.to_string()).await
+  }
 
+  /// get user by id
+  pub async fn get_user_by_id(conn: &mut AsyncMysqlConnection, id: &u32) -> Result<User, IError> {
     users::table
-      .filter(users::uid.eq(new_user.uid))
+      .filter(users::id.eq(id))
       .select(User::as_select())
       .first(conn)
       .await
@@ -55,13 +59,13 @@ impl UserRepo {
       .map_err(|err| IError::ServerError(err.to_string()))
   }
 
-  /// update user data by uid
-  pub async fn update_user_by_uid<'a>(
+  /// update user data by id
+  pub async fn update_user_by_id<'a>(
     conn: &mut AsyncMysqlConnection,
-    uid: &String,
+    id: &u32,
     payload: UpdateUserPayload<'a>,
   ) -> Result<User, IError> {
-    diesel::update(users_dsl.filter(users::uid.eq(uid)))
+    diesel::update(users_dsl.filter(users::id.eq(id)))
       .set((
         users::first_name.eq(payload.first_name),
         users::last_name.eq(payload.last_name),
@@ -73,21 +77,21 @@ impl UserRepo {
       .map_err(|err| IError::ServerError(err.to_string()))?;
 
     users::table
-      .filter(users::uid.eq(uid))
+      .filter(users::id.eq(id))
       .select(User::as_select())
       .first(conn)
       .await
       .map_err(|err: diesel::result::Error| IError::ServerError(err.to_string()))
   }
 
-  /// update username
-  pub async fn update_username_by_uid(
+  /// update username by id
+  pub async fn update_username_by_id(
     conn: &mut AsyncMysqlConnection,
-    uid: &String,
+    id: &u32,
     username: &String,
   ) -> Result<(), IError> {
     let res: Result<usize, diesel::result::Error> =
-      diesel::update(users_dsl.filter(users::uid.eq(uid)))
+      diesel::update(users_dsl.filter(users::id.eq(id)))
         .set(users::username.eq(username))
         .execute(conn)
         .await;
@@ -97,14 +101,14 @@ impl UserRepo {
     Ok(())
   }
 
-  /// update user avatar
-  pub async fn update_avatar_by_uid(
+  /// update user avatar by id
+  pub async fn update_avatar_by_id(
     conn: &mut AsyncMysqlConnection,
-    uid: &String,
+    id: &u32,
     avatar: &String,
   ) -> Result<(), IError> {
     let res: Result<usize, diesel::result::Error> =
-      diesel::update(users_dsl.filter(users::uid.eq(uid)))
+      diesel::update(users_dsl.filter(users::id.eq(id)))
         .set(users::avatar.eq(avatar))
         .execute(conn)
         .await;

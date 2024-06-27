@@ -1,9 +1,10 @@
-use actix_web::HttpRequest;
+use std::sync::Arc;
 
 use crate::{Auth, IError};
+use actix_web::HttpRequest;
 
 pub trait ExtraRequests {
-  fn auth(&self) -> Result<Auth, IError>;
+  fn auth(&self) -> Result<Arc<Auth>, IError>;
 }
 
 impl ExtraRequests for HttpRequest {
@@ -11,7 +12,7 @@ impl ExtraRequests for HttpRequest {
   /// ```
   /// let auth = req.auth()?;
   /// ```
-  fn auth(&self) -> Result<Auth, IError> {
+  fn auth(&self) -> Result<Arc<Auth>, IError> {
     let headers = self.headers();
     let auth_id = headers.get("x-auth-id");
     if auth_id.is_none() {
@@ -19,8 +20,7 @@ impl ExtraRequests for HttpRequest {
         "x-auth-id not found in the header",
       )));
     }
-
-    let uid = auth_id.unwrap().to_str().unwrap().to_string();
-    return Ok(Auth { user_uid: uid });
+    let id: u32 = auth_id.unwrap().to_str().unwrap().parse::<u32>().unwrap();
+    Ok(Arc::new(Auth { user_id: id }))
   }
 }

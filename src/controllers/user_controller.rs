@@ -34,10 +34,7 @@ pub async fn update(
   payload.validate().map_err(IError::ValidationError)?;
   // get auth
   let auth = req.auth()?;
-  let mut user_service = UserService {
-    pool: pool.into_inner(),
-    auth,
-  };
+  let mut user_service = UserService { pool, auth };
   let res = user_service.update_user_data(payload.into_inner()).await?;
   Ok(Json(res))
 }
@@ -62,10 +59,7 @@ pub async fn change_username(
   payload.validate().map_err(IError::ValidationError)?;
   // get auth
   let auth = req.auth()?;
-  let mut user_service = UserService {
-    pool: pool.into_inner(),
-    auth,
-  };
+  let mut user_service = UserService { pool, auth };
   let res = user_service.change_user_name(payload.into_inner()).await?;
   return Ok(Json(res));
 }
@@ -89,14 +83,21 @@ pub async fn change_avatar(
 ) -> Result<impl Responder, IError> {
   let auth = req.auth()?;
   let avatar = form.avatar;
-  let mut user_service = UserService {
-    pool: pool.into_inner(),
-    auth,
-  };
+  let mut user_service = UserService { pool, auth };
   let res = user_service.change_avatar(&avatar).await?;
   Ok(Json(res))
 }
 
+/// update user informations
+#[utoipa::path(
+  tag = "User",
+  responses(
+    (status = 200, description = "success", body = UserDetailResponse),
+  ),
+  security(
+    ("bearer_token" = [])
+  )
+)]
 #[post("/auth/user/infos")]
 pub async fn update_user_infos(
   req: HttpRequest,
@@ -105,12 +106,9 @@ pub async fn update_user_infos(
 ) -> Result<impl Responder, IError> {
   // validate request
   payload.validate().map_err(IError::ValidationError)?;
-  // let infos = payload.infos.as_ref().unwrap();
-  // for info in infos {
-  //   info.validate().map_err(IError::ValidationError)?;
-  // }
-
   let auth = req.auth()?;
-  let user = auth.user(&pool).await?;
-  Ok(Json(user))
+  let infos = payload.into_inner();
+  let mut user_service = UserService { pool, auth };
+  let res = user_service.update_user_info(infos).await?;
+  Ok(Json(res))
 }

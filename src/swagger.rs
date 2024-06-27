@@ -1,5 +1,6 @@
 use crate::models::{User, UserInfo};
-use crate::requests::{ChangeAvatarRequest, ChangeUsernameRequest, UserUpdateRequest, UserLoginRequest};
+use crate::requests::user_info_update_request::Info;
+use crate::requests::{ChangeAvatarRequest, ChangeUsernameRequest, UserInfoUpdateRequest, UserLoginRequest, UserUpdateRequest};
 use crate::response::{ChangeAvatarResponse, ChangeUsernameResponse, UserLoginResponse, UserDetailResponse};
 use crate::controllers::{auth_controller, user_controller};
 use crate::utils::jwt::JwtToken;
@@ -27,14 +28,17 @@ use utoipa::{
     user_controller::update,
     user_controller::change_username,
     user_controller::change_avatar,
+    user_controller::update_user_infos
   ),
   components(schemas(
     User, 
+    Info,
     UserInfo,
     UserLoginRequest,
     JwtToken,
     UserLoginResponse,
     UserDetailResponse,
+    UserInfoUpdateRequest,
     UserUpdateRequest,
     ChangeUsernameRequest,
     ChangeUsernameResponse,

@@ -35,3 +35,13 @@ pub struct UserInfo {
   #[serde(skip)]
   pub updated_at: Option<chrono::NaiveDateTime>,
 }
+
+/// Creating new user info payload
+#[derive(Insertable)]
+#[diesel(table_name = user_infos)]
+pub struct NewUserInfoPayload<'a> {
+  pub user_id: &'a u32,
+  pub info_key: &'a str,
+  pub info_value: Option<&'a str>,
+  pub info_type: &'a str,
+}

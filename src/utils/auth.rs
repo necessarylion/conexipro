@@ -1,12 +1,12 @@
 use crate::{models::User, repository::UserRepo, DbPool, IError};
 use std::sync::Arc;
 pub struct Auth {
-  pub user_uid: String,
+  pub user_id: u32,
 }
 
 impl Auth {
-  pub fn uid(&self) -> &String {
-    &self.user_uid
+  pub fn id(&self) -> &u32 {
+    &self.user_id
   }
 
   pub async fn user(&self, pool: &Arc<DbPool>) -> Result<User, IError> {
@@ -14,6 +14,6 @@ impl Auth {
       .get()
       .await
       .map_err(|err| IError::ServerError(err.to_string()))?;
-    UserRepo::get_user_by_uid(conn, &self.uid()).await
+    UserRepo::get_user_by_id(conn, &self.id()).await
   }
 }

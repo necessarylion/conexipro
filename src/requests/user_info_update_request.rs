@@ -3,20 +3,23 @@ use utoipa::ToSchema;
 use validator::{Validate, ValidationError};
 use validator_derive::Validate;
 
-#[derive(Debug, Deserialize, Serialize, Validate, ToSchema)]
+#[derive(Debug, Deserialize, Serialize, Validate, ToSchema, Clone)]
 pub struct Info {
   #[validate(
     required(message = "info_key is required"),
     length(min = 1, message = "info_key is required")
   )]
+  #[schema(example = "facebook", required = true)]
   pub info_key: Option<String>,
 
   #[validate(
     required(message = "info_value is required"),
     length(min = 1, message = "info_value is required")
   )]
+  #[schema(example = "https://facebook.com/zinkyaw", required = true)]
   pub info_value: Option<String>,
 
+  #[schema(example = "contact", required = false)]
   pub info_type: Option<String>,
 }
 

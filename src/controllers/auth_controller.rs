@@ -6,7 +6,7 @@ use crate::{
   utils::{
     db::{get_db_conn, DbConn},
     firebase::FireAuth,
-    jwt, to_str,
+    jwt, SomeStr,
   },
   DbPool, IError,
 };
@@ -49,7 +49,7 @@ pub async fn login(
   if user.is_err() {
     let display_name = firebase_user.display_name.as_ref().unwrap();
     let email = firebase_user.email.as_ref();
-    let email = to_str(email);
+    let email = SomeStr(email);
     // prepare new user payload
     let new_user = NewUserPayload {
       uid: &uid,
@@ -61,13 +61,14 @@ pub async fn login(
     user = UserRepo::create_user(conn, new_user).await;
   }
 
-  let token = jwt::create(&uid)?;
+  let user = user?;
+  let token = jwt::create(&user.id)?;
   let token_string = token.token.to_string();
 
   let res = UserLoginResponse {
     token,
     success: true,
-    user: user?,
+    user,
   };
 
   Ok(
@@ -110,7 +111,7 @@ pub async fn fetch(req: HttpRequest, pool: Data<DbPool>) -> Result<impl Responde
 #[get("/auth/refresh")]
 pub async fn refresh(req: HttpRequest, pool: Data<DbPool>) -> Result<impl Responder, IError> {
   let auth = req.auth()?;
-  let token = jwt::create(auth.uid())?;
+  let token = jwt::create(auth.id())?;
   let token_string = token.token.to_string();
   let user = auth.user(&pool).await?;
 
