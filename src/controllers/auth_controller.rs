@@ -21,11 +21,12 @@ use validator::Validate;
 #[utoipa::path(
   post,
   path = "/auth/login",
+  tag = "Auth",
   responses(
     (status = 200, description = "success", body = UserLoginResponse),
   ),
 )]
-pub async fn login_or_register(
+pub async fn login(
   pool: Data<DbPool>,
   info: Json<UserLoginRequest>,
 ) -> Result<impl Responder, IError> {
@@ -78,6 +79,7 @@ pub async fn login_or_register(
 
 /// Fetch user information
 #[utoipa::path(
+  tag = "Auth",
   responses(
     (status = 200, description = "success", body = User),
   ),
@@ -94,6 +96,7 @@ pub async fn fetch(req: HttpRequest, pool: Data<DbPool>) -> Result<impl Responde
 
 /// Refresh user new token
 #[utoipa::path(
+  tag = "Auth",
   responses(
     (status = 200, description = "success", body = UserLoginResponse),
   ),

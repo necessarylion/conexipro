@@ -1,8 +1,8 @@
 use crate::models::User;
-use crate::requests::{ChangeAvatarRequest, ChangeUsernameRequest, UserUpdateRequest};
+use crate::requests::{ChangeAvatarRequest, ChangeUsernameRequest, UserUpdateRequest, UserLoginRequest};
 use crate::response::{ChangeAvatarResponse, ChangeUsernameResponse, UserLoginResponse};
+use crate::controllers::{auth_controller, user_controller};
 use crate::utils::jwt::JwtToken;
-use crate::{controllers::{auth_controller, user_controller}, requests::UserLoginRequest};
 use utoipa::{
   openapi::{
     self,
@@ -22,12 +22,12 @@ use utoipa::{
   ),
   paths(
     auth_controller::fetch, 
-    auth_controller::login_or_register,
+    auth_controller::login,
     auth_controller::refresh,
     user_controller::update,
     user_controller::change_username,
     user_controller::change_avatar,
-  ), 
+  ),
   components(schemas(
     User, 
     UserLoginRequest,
@@ -54,4 +54,10 @@ impl Modify for SecurityAddon {
       SecurityScheme::Http(Http::new(HttpAuthScheme::Bearer)),
     );
   }
+}
+
+/// crate swagger json file
+pub fn crate_swagger_file() -> () {
+  let val = ApiDoc::openapi().to_pretty_json().unwrap();
+  std::fs::write("./swagger.json", val).unwrap();
 }

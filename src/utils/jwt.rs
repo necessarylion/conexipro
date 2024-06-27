@@ -15,6 +15,7 @@ pub struct JwtClaims {
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[schema(title = "Token")]
 pub struct JwtToken {
   #[schema(example = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...")]
   pub token: String,

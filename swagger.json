@@ -1,0 +1,427 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "conexipro",
+    "description": "",
+    "license": {
+      "name": ""
+    },
+    "version": "0.1.0"
+  },
+  "servers": [
+    {
+      "url": "{BaseUrl}",
+      "variables": {
+        "BaseUrl": {
+          "default": "http://127.0.0.1:3335/api"
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "User login or registraion using firebase token",
+        "operationId": "login",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserLoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserLoginResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Refresh user new token",
+        "operationId": "refresh",
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserLoginResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_token": []
+          }
+        ]
+      }
+    },
+    "/auth/user": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Fetch user information",
+        "operationId": "fetch",
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_token": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "update user information",
+        "operationId": "update",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_token": []
+          }
+        ]
+      }
+    },
+    "/auth/user/avatar": {
+      "put": {
+        "tags": [
+          "User"
+        ],
+        "summary": "change user avatar image",
+        "operationId": "change_avatar",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeAvatarRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangeAvatarResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_token": []
+          }
+        ]
+      }
+    },
+    "/auth/user/username": {
+      "put": {
+        "tags": [
+          "User"
+        ],
+        "summary": "change username",
+        "operationId": "change_username",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeUsernameRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangeUsernameResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer_token": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ChangeAvatarRequest": {
+        "type": "object",
+        "required": [
+          "avatar"
+        ],
+        "properties": {
+          "avatar": {
+            "type": "string",
+            "format": "binary"
+          }
+        }
+      },
+      "ChangeAvatarResponse": {
+        "type": "object",
+        "required": [
+          "avatar"
+        ],
+        "properties": {
+          "avatar": {
+            "type": "string",
+            "example": "http://127.0.0.1:3335/files/conexipro-dev/72e1f1ea-7958-484b-97c2-b91d842e60c8.png"
+          }
+        }
+      },
+      "ChangeUsernameRequest": {
+        "type": "object",
+        "required": [
+          "username"
+        ],
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "conexipro",
+            "nullable": true
+          }
+        }
+      },
+      "ChangeUsernameResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "username updated successfully"
+          },
+          "success": {
+            "type": "boolean",
+            "example": "true"
+          }
+        }
+      },
+      "JwtToken": {
+        "type": "object",
+        "title": "Token",
+        "required": [
+          "token",
+          "token_type",
+          "expired_date"
+        ],
+        "properties": {
+          "expired_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "token": {
+            "type": "string",
+            "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+          },
+          "token_type": {
+            "type": "string",
+            "example": "Bearer"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "description": "User Modal",
+        "required": [
+          "id",
+          "uid",
+          "username",
+          "first_name"
+        ],
+        "properties": {
+          "avatar": {
+            "type": "string",
+            "example": "http://127.0.0.1:3335/files/conexipro-dev/72e1f1ea-7958-484b-97c2-b91d842e60c8.png",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "display_name": {
+            "type": "string",
+            "example": "AJ",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "example": "aj.zinkyaw@gmail.com",
+            "nullable": true
+          },
+          "first_name": {
+            "type": "string",
+            "example": "Zin Kyaw"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32",
+            "example": "1",
+            "minimum": 0
+          },
+          "last_name": {
+            "type": "string",
+            "example": "Kyaw",
+            "nullable": true
+          },
+          "middle_name": {
+            "type": "string",
+            "example": "",
+            "nullable": true
+          },
+          "uid": {
+            "type": "string",
+            "example": "UVsflAVCCSR1aaB1dzIh1TPdPG63"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "username": {
+            "type": "string",
+            "example": "zinkyawkyaw"
+          }
+        }
+      },
+      "UserLoginRequest": {
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "properties": {
+          "token": {
+            "type": "string",
+            "example": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImYwOGU2Z...",
+            "nullable": true
+          }
+        }
+      },
+      "UserLoginResponse": {
+        "type": "object",
+        "required": [
+          "token",
+          "success",
+          "user"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "token": {
+            "$ref": "#/components/schemas/JwtToken"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          }
+        }
+      },
+      "UserUpdateRequest": {
+        "type": "object",
+        "required": [
+          "first_name"
+        ],
+        "properties": {
+          "display_name": {
+            "type": "string",
+            "example": "AJ",
+            "nullable": true
+          },
+          "first_name": {
+            "type": "string",
+            "example": "Zin Kyaw",
+            "nullable": true
+          },
+          "last_name": {
+            "type": "string",
+            "example": "Kyaw",
+            "nullable": true
+          },
+          "middle_name": {
+            "type": "string",
+            "example": "",
+            "nullable": true
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearer_token": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

@@ -8,5 +8,6 @@ pub struct ChangeUsernameRequest {
     required(message = "Username is required"),
     length(min = 1, message = "Username is required")
   )]
+  #[schema(example = "conexipro", required = true)]
   pub username: Option<String>,
 }

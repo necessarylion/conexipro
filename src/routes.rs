@@ -24,10 +24,7 @@ pub fn get_api_services() -> Scope<
   scope("")
     .wrap(middleware::NormalizePath::new(TrailingSlash::default()))
     // login or register do not required middleware to check token
-    .route(
-      "/api/auth/login",
-      post().to(auth_controller::login_or_register),
-    )
+    .route("/api/auth/login", post().to(auth_controller::login))
     .route(
       "/files/{filename:.*}",
       get().to(general_controller::render_file),

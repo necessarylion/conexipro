@@ -3,7 +3,7 @@ use actix_web::{middleware::Logger, web::Data, App, HttpServer};
 use conexipro::{
   middleware::{cors_middleware, rate_limit_middleware},
   routes,
-  swagger::ApiDoc,
+  swagger::{crate_swagger_file, ApiDoc},
   utils::db::{self, get_normal_db_connection},
   DbPool,
 };
@@ -17,6 +17,8 @@ use utoipa_swagger_ui::SwaggerUi;
 async fn main() -> Result<()> {
   // load env variables
   dotenv().ok();
+
+  crate_swagger_file();
 
   // enable logger
   env_logger::init_from_env(Env::default().default_filter_or("info"));
