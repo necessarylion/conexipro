@@ -32,9 +32,9 @@ pub fn get_api_services() -> Scope<
     .service(
       scope("api")
         .wrap(from_fn(auth_middleware::handler))
-        .service(auth_controller::refresh)
-        .service(auth_controller::fetch)
-        .service(user_controller::update)
+        .service(auth_controller::refresh_user_token)
+        .service(auth_controller::fetch_user)
+        .service(user_controller::update_user)
         .service(user_controller::change_username)
         .service(user_controller::change_avatar)
         .service(user_controller::update_user_infos),

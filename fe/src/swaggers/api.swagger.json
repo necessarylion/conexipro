@@ -57,7 +57,7 @@
           "Auth"
         ],
         "summary": "Refresh user new token",
-        "operationId": "refresh",
+        "operationId": "refresh_user_token",
         "responses": {
           "200": {
             "description": "success",
@@ -83,7 +83,7 @@
           "Auth"
         ],
         "summary": "Fetch user information",
-        "operationId": "fetch",
+        "operationId": "fetch_user",
         "responses": {
           "200": {
             "description": "success",
@@ -107,7 +107,7 @@
           "User"
         ],
         "summary": "update user information",
-        "operationId": "update",
+        "operationId": "update_user",
         "requestBody": {
           "description": "",
           "content": {

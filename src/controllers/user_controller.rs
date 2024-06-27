@@ -25,7 +25,7 @@ use validator::Validate;
   )
 )]
 #[post("/auth/user")]
-pub async fn update(
+pub async fn update_user(
   req: HttpRequest,
   pool: web::Data<DbPool>,
   payload: Json<UserUpdateRequest>,

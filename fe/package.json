@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "generate:api": "for f in ./src/swaggers/*; do [ -f \"$f\" ] && npx swagger-typescript-api -p \"$f\" -o ./src/apis -n $(basename \"$f\" .swagger.json).ts; done"
   },
   "dependencies": {
     "firebase": "^10.12.2",

@@ -22,10 +22,10 @@ use utoipa::{
     )
   ),
   paths(
-    auth_controller::fetch, 
     auth_controller::login,
-    auth_controller::refresh,
-    user_controller::update,
+    auth_controller::fetch_user, 
+    auth_controller::refresh_user_token,
+    user_controller::update_user,
     user_controller::change_username,
     user_controller::change_avatar,
     user_controller::update_user_infos
@@ -65,5 +65,5 @@ impl Modify for SecurityAddon {
 /// crate swagger json file
 pub fn crate_swagger_file() -> () {
   let val = ApiDoc::openapi().to_pretty_json().unwrap();
-  std::fs::write("./swagger.json", val).unwrap();
+  std::fs::write("./fe/src/swaggers/api.swagger.json", val).unwrap();
 }

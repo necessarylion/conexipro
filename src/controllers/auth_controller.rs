@@ -89,7 +89,7 @@ pub async fn login(
   )
 )]
 #[get("/auth/user")]
-pub async fn fetch(req: HttpRequest, pool: Data<DbPool>) -> Result<impl Responder, IError> {
+pub async fn fetch_user(req: HttpRequest, pool: Data<DbPool>) -> Result<impl Responder, IError> {
   let auth = req.auth()?;
   let user = auth.user(&pool).await?;
   let conn = &mut get_db_conn(&pool).await?;
@@ -109,7 +109,10 @@ pub async fn fetch(req: HttpRequest, pool: Data<DbPool>) -> Result<impl Responde
   )
 )]
 #[get("/auth/refresh")]
-pub async fn refresh(req: HttpRequest, pool: Data<DbPool>) -> Result<impl Responder, IError> {
+pub async fn refresh_user_token(
+  req: HttpRequest,
+  pool: Data<DbPool>,
+) -> Result<impl Responder, IError> {
   let auth = req.auth()?;
   let token = jwt::create(auth.id())?;
   let token_string = token.token.to_string();
