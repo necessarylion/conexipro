@@ -1,5 +1,8 @@
 use crate::{
-  requests::{ChangeAvatarRequest, ChangeUsernameRequest, ExtraRequests, UserUpdateRequest},
+  requests::{
+    ChangeAvatarRequest, ChangeUsernameRequest, ExtraRequests, UserInfoUpdateRequest,
+    UserUpdateRequest,
+  },
   services::UserService,
   DbPool, IError,
 };
@@ -92,4 +95,22 @@ pub async fn change_avatar(
   };
   let res = user_service.change_avatar(&avatar).await?;
   Ok(Json(res))
+}
+
+#[post("/auth/user/infos")]
+pub async fn update_user_infos(
+  req: HttpRequest,
+  pool: web::Data<DbPool>,
+  payload: Json<UserInfoUpdateRequest>,
+) -> Result<impl Responder, IError> {
+  // validate request
+  payload.validate().map_err(IError::ValidationError)?;
+  // let infos = payload.infos.as_ref().unwrap();
+  // for info in infos {
+  //   info.validate().map_err(IError::ValidationError)?;
+  // }
+
+  let auth = req.auth()?;
+  let user = auth.user(&pool).await?;
+  Ok(Json(user))
 }

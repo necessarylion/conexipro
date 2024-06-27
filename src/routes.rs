@@ -36,6 +36,7 @@ pub fn get_api_services() -> Scope<
         .service(auth_controller::fetch)
         .service(user_controller::update)
         .service(user_controller::change_username)
-        .service(user_controller::change_avatar),
+        .service(user_controller::change_avatar)
+        .service(user_controller::update_user_infos),
     )
 }
