@@ -1,7 +1,8 @@
 use crate::{
   models::NewUserPayload,
   repository::UserRepo,
-  requests::{ExtraRequests, UserRegisterRequest},
+  requests::{ExtraRequests, UserLoginRequest},
+  response::UserLoginResponse,
   utils::{
     db::{get_db_conn, DbConn},
     firebase::FireAuth,
@@ -14,14 +15,19 @@ use actix_web::{
   web::{Data, Json},
   HttpRequest, HttpResponse, Responder,
 };
-use serde_json::json;
 use validator::Validate;
 
-/// user registration.
-/// require firebase token to login
+/// User login or registraion using firebase token
+#[utoipa::path(
+  post,
+  path = "/api/auth/login",
+  responses(
+    (status = 200, description = "success", body = UserLoginResponse),
+  ),
+)]
 pub async fn login_or_register(
   pool: Data<DbPool>,
-  info: Json<UserRegisterRequest>,
+  info: Json<UserLoginRequest>,
 ) -> Result<impl Responder, IError> {
   info.validate().map_err(IError::ValidationError)?;
 
@@ -55,21 +61,32 @@ pub async fn login_or_register(
   }
 
   let token = jwt::create(&uid)?;
+  let token_string = token.token.to_string();
 
-  let response = json!({
-    "token": token,
-    "success": true,
-    "user": user?,
-  });
+  let res = UserLoginResponse {
+    token,
+    success: true,
+    user: user?,
+  };
 
   Ok(
     HttpResponse::Ok()
-      .insert_header(("Authorization", token.token))
-      .json(response),
+      .insert_header(("Authorization", token_string))
+      .json(res),
   )
 }
 
-/// fetch user information
+/// Fetch user information
+#[utoipa::path(
+  get,
+  path = "/api/auth/user",
+  responses(
+    (status = 200, description = "success", body = User),
+  ),
+  security(
+    ("bearer_token" = [])
+  )
+)]
 #[get("/auth/user")]
 pub async fn fetch(req: HttpRequest, pool: Data<DbPool>) -> Result<impl Responder, IError> {
   let auth = req.auth()?;
@@ -77,21 +94,32 @@ pub async fn fetch(req: HttpRequest, pool: Data<DbPool>) -> Result<impl Responde
   Ok(Json(user))
 }
 
-/// refresh user new token
+/// Refresh user new token
+#[utoipa::path(
+  get,
+  path = "/api/auth/refresh",
+  responses(
+    (status = 200, description = "success", body = UserLoginResponse),
+  ),
+  security(
+    ("bearer_token" = [])
+  )
+)]
 #[get("/auth/refresh")]
 pub async fn refresh(req: HttpRequest, pool: Data<DbPool>) -> Result<impl Responder, IError> {
   let auth = req.auth()?;
   let token = jwt::create(auth.uid())?;
+  let token_string = token.token.to_string();
   let user = auth.user(&pool).await?;
-  let response = json!({
-    "token": token,
-    "success": true,
-    "user": user,
-  });
 
+  let res = UserLoginResponse {
+    token,
+    success: true,
+    user,
+  };
   Ok(
     HttpResponse::Ok()
-      .insert_header(("Authorization", token.token))
-      .json(response),
+      .insert_header(("Authorization", token_string))
+      .json(res),
   )
 }

@@ -1,7 +1,8 @@
 use serde::Deserialize;
+use utoipa::ToSchema;
 use validator_derive::Validate;
 
-#[derive(Debug, Deserialize, Validate)]
+#[derive(Debug, Deserialize, Validate, ToSchema)]
 pub struct UserUpdateRequest {
   #[validate(
     required(message = "First name is required"),

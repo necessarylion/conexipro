@@ -1,15 +1,13 @@
-use std::sync::Arc;
-
-use crate::IError;
-
 use super::get_env;
+use crate::IError;
 use bb8::PooledConnection;
 use diesel::{Connection, MysqlConnection};
 use diesel_async::pooled_connection::AsyncDieselConnectionManager;
 use diesel_async::{pooled_connection::bb8::Pool, AsyncMysqlConnection};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
+use std::sync::Arc;
 
-const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
+/// types
 pub type DbPool = Pool<AsyncMysqlConnection>;
 pub type DbConn<'a> = PooledConnection<'a, AsyncDieselConnectionManager<AsyncMysqlConnection>>;
 
@@ -25,6 +23,7 @@ pub async fn get_db_pool() -> DbPool {
     .unwrap()
 }
 
+/// get database connection from pool
 pub async fn get_db_conn(pool: &Arc<DbPool>) -> Result<DbConn, IError> {
   pool
     .get()
@@ -41,6 +40,7 @@ pub fn get_normal_db_connection() -> MysqlConnection {
 /// run database migration in PRODUCTION ONLY
 /// required APP_ENV=production to run automatically
 pub fn run_db_migrations(conn: &mut impl MigrationHarness<diesel::mysql::Mysql>) {
+  const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
   let app_env = get_env("APP_ENV").unwrap();
   if app_env == String::from("production") {
     log::info!("Started DB Migration");

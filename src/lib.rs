@@ -4,9 +4,12 @@ pub mod middleware;
 pub mod models;
 pub mod repository;
 pub mod requests;
+pub mod response;
 pub mod routes;
 pub mod schema;
 pub mod services;
+pub mod swagger;
+pub mod types;
 pub mod utils;
 
 // exports

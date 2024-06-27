@@ -12,6 +12,16 @@ use actix_web::{
 use validator::Validate;
 
 /// update user information
+#[utoipa::path(
+  post,
+  path = "/api/auth/user",
+  responses(
+    (status = 200, description = "success", body = User),
+  ),
+  security(
+    ("bearer_token" = [])
+  )
+)]
 #[post("/auth/user")]
 pub async fn update(
   req: HttpRequest,
@@ -31,6 +41,16 @@ pub async fn update(
 }
 
 /// change username
+#[utoipa::path(
+  put,
+  path = "/api/auth/user/username",
+  responses(
+    (status = 200, description = "success", body = ChangeUsernameResponse),
+  ),
+  security(
+    ("bearer_token" = [])
+  )
+)]
 #[put("/auth/user/username")]
 pub async fn change_username(
   req: HttpRequest,
@@ -50,6 +70,16 @@ pub async fn change_username(
 }
 
 /// change user avatar image
+#[utoipa::path(
+  put,
+  path = "/api/auth/user/avatar",
+  responses(
+    (status = 200, description = "success", body = ChangeUsernameResponse),
+  ),
+  security(
+    ("bearer_token" = [])
+  )
+)]
 #[put("/auth/user/avatar")]
 pub async fn change_avatar(
   req: HttpRequest,

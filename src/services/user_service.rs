@@ -1,13 +1,12 @@
-use std::sync::Arc;
-
 use actix_multipart::form::tempfile::TempFile;
-use serde_json::{json, Value};
+use std::sync::Arc;
 
 use crate::{
   app::get_file_url,
   models::{UpdateUserPayload, User},
   repository::UserRepo,
   requests::{ChangeUsernameRequest, UserUpdateRequest},
+  response::{ChangeAvatarResponse, ChangeUsernameResponse},
   utils::{
     db::{get_db_conn, DbConn},
     to_str, validate_file,
@@ -38,7 +37,7 @@ impl UserService {
   }
 
   /// update avatar
-  pub async fn change_avatar(&mut self, avatar: &TempFile) -> Result<Value, IError> {
+  pub async fn change_avatar(&mut self, avatar: &TempFile) -> Result<ChangeAvatarResponse, IError> {
     validate_file("avatar", 2.0, avatar)?;
 
     let file = &mut avatar.file.as_file();
@@ -58,16 +57,16 @@ impl UserService {
     }
 
     UserRepo::update_avatar_by_uid(conn, auth.uid(), &avatar).await?;
-    Ok(json!({
-      "avatar": get_file_url(&avatar)
-    }))
+    Ok(ChangeAvatarResponse {
+      avatar: get_file_url(&avatar),
+    })
   }
 
   /// change username
   pub async fn change_user_name(
     &mut self,
     payload: ChangeUsernameRequest,
-  ) -> Result<Value, IError> {
+  ) -> Result<ChangeUsernameResponse, IError> {
     let auth = &self.auth;
 
     let username = payload.username.as_ref().unwrap();
@@ -76,9 +75,10 @@ impl UserService {
     let conn: &mut DbConn = &mut get_db_conn(&self.pool).await?;
     let user = UserRepo::get_user_by_username(conn, username).await;
 
-    let success = json!({
-      "success": true
-    });
+    let success = ChangeUsernameResponse {
+      success: true,
+      message: String::from("username updated successfully"),
+    };
 
     // if record do not found, the function will return error.
     // which mean username is not taken and able to change.
@@ -97,9 +97,9 @@ impl UserService {
 
     // if record found and not match with auth user,
     // it mean username is already taken.
-    Ok(json!({
-      "success": false,
-      "message": format!("username {} is already taken", username)
-    }))
+    Ok(ChangeUsernameResponse {
+      success: false,
+      message: format!("username {} is already taken", username),
+    })
   }
 }

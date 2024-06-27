@@ -1,18 +1,17 @@
 extern crate conexipro;
-use actix_web::{
-  middleware::{self, Logger, TrailingSlash},
-  web::Data,
-  App, HttpServer,
-};
+use actix_web::{middleware::Logger, web::Data, App, HttpServer};
 use conexipro::{
   middleware::{cors_middleware, rate_limit_middleware},
   routes,
+  swagger::ApiDoc,
   utils::db::{self, get_normal_db_connection},
   DbPool,
 };
 use dotenv::dotenv;
 use env_logger::Env;
 use std::{env, io::Result};
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
 #[actix_web::main]
 async fn main() -> Result<()> {
@@ -38,7 +37,9 @@ async fn main() -> Result<()> {
       .wrap(cors_middleware::handler())
       .wrap(rate_limit_middleware::handler())
       .wrap(Logger::default())
-      .wrap(middleware::NormalizePath::new(TrailingSlash::default()))
+      .service(
+        SwaggerUi::new("/swagger-ui/{_:.*}").url("/api-docs/openapi.json", ApiDoc::openapi()),
+      )
       .app_data(Data::new(pool.clone()))
       .service(routes::get_api_services())
   })

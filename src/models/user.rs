@@ -1,9 +1,10 @@
 use crate::{schema::users, serializer::file_url};
 use diesel::prelude::*;
 use serde::Serialize;
+use utoipa::ToSchema;
 
 /// User Modal
-#[derive(Queryable, Selectable, Serialize, Debug)]
+#[derive(Queryable, Selectable, Serialize, Debug, ToSchema)]
 #[diesel(table_name = users)]
 #[diesel(check_for_backend(diesel::mysql::Mysql))]
 pub struct User {

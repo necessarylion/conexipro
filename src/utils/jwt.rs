@@ -1,6 +1,7 @@
 use chrono::{DateTime, Duration, Utc};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
+use utoipa::{openapi::schema, ToSchema};
 
 use crate::IError;
 
@@ -13,9 +14,11 @@ pub struct JwtClaims {
   pub exp: usize,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct JwtToken {
+  #[schema(example = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...")]
   pub token: String,
+  #[schema(example = "Bearer")]
   pub token_type: String,
   pub expired_date: DateTime<Utc>,
 }
