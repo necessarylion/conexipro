@@ -90,7 +90,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/User"
+                  "$ref": "#/components/schemas/UserResponse"
                 }
               }
             }
@@ -295,7 +295,6 @@
         "type": "object",
         "description": "User Modal",
         "required": [
-          "id",
           "uid",
           "username",
           "first_name"
@@ -325,12 +324,6 @@
             "type": "string",
             "example": "Zin Kyaw"
           },
-          "id": {
-            "type": "integer",
-            "format": "int32",
-            "example": "1",
-            "minimum": 0
-          },
           "last_name": {
             "type": "string",
             "example": "Kyaw",
@@ -355,6 +348,28 @@
             "example": "zinkyawkyaw"
           }
         }
+      },
+      "UserDetailResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/User"
+          },
+          {
+            "type": "object",
+            "required": [
+              "infos"
+            ],
+            "properties": {
+              "infos": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/UserInfo"
+                },
+                "example": "[{ \"info_key\": \"facebook\", \"info_value\": \"https://facebook.com/zinkyaw\", \"info_type\": \"contact\" }]"
+              }
+            }
+          }
+        ]
       },
       "UserLoginRequest": {
         "type": "object",

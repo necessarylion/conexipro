@@ -1,14 +1,21 @@
-use crate::{schema::users, serializer::file_url};
+use super::UserInfo;
+use crate::{
+  schema::{user_infos, users},
+  serializer::file_url,
+  IError,
+};
 use diesel::prelude::*;
+use diesel_async::{AsyncMysqlConnection, RunQueryDsl};
 use serde::Serialize;
 use utoipa::ToSchema;
 
 /// User Modal
-#[derive(Queryable, Selectable, Serialize, Debug, ToSchema)]
+#[derive(Queryable, Selectable, Identifiable, Serialize, Debug, PartialEq, ToSchema)]
 #[diesel(table_name = users)]
 #[diesel(check_for_backend(diesel::mysql::Mysql))]
 pub struct User {
   #[schema(example = "1")]
+  #[serde(skip)]
   pub id: u32,
 
   #[schema(example = "UVsflAVCCSR1aaB1dzIh1TPdPG63")]
@@ -41,6 +48,16 @@ pub struct User {
   pub created_at: Option<chrono::NaiveDateTime>,
 
   pub updated_at: Option<chrono::NaiveDateTime>,
+}
+
+impl User {
+  pub async fn infos(&self, conn: &mut AsyncMysqlConnection) -> Result<Vec<UserInfo>, IError> {
+    let res = user_infos::table
+      .filter(user_infos::user_id.eq(self.id))
+      .load::<UserInfo>(conn)
+      .await;
+    res.map_err(|err| IError::ServerError(err.to_string()))
+  }
 }
 
 /// Creating new user payload

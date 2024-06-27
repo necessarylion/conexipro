@@ -2,7 +2,7 @@ use crate::{
   models::NewUserPayload,
   repository::UserRepo,
   requests::{ExtraRequests, UserLoginRequest},
-  response::UserLoginResponse,
+  response::{UserDetailResponse, UserLoginResponse},
   utils::{
     db::{get_db_conn, DbConn},
     firebase::FireAuth,
@@ -81,7 +81,7 @@ pub async fn login(
 #[utoipa::path(
   tag = "Auth",
   responses(
-    (status = 200, description = "success", body = User),
+    (status = 200, description = "success", body = UserResponse),
   ),
   security(
     ("bearer_token" = [])
@@ -91,7 +91,10 @@ pub async fn login(
 pub async fn fetch(req: HttpRequest, pool: Data<DbPool>) -> Result<impl Responder, IError> {
   let auth = req.auth()?;
   let user = auth.user(&pool).await?;
-  Ok(Json(user))
+  let conn = &mut get_db_conn(&pool).await?;
+  let infos = user.infos(conn).await?;
+  let res = UserDetailResponse { user, infos };
+  Ok(Json(res))
 }
 
 /// Refresh user new token
