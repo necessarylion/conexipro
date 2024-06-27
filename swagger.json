@@ -90,7 +90,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserResponse"
+                  "$ref": "#/components/schemas/UserDetailResponse"
                 }
               }
             }
@@ -370,6 +370,29 @@
             }
           }
         ]
+      },
+      "UserInfo": {
+        "type": "object",
+        "description": "User Modal",
+        "required": [
+          "info_key"
+        ],
+        "properties": {
+          "info_key": {
+            "type": "string",
+            "example": "phone"
+          },
+          "info_type": {
+            "type": "string",
+            "example": "contact",
+            "nullable": true
+          },
+          "info_value": {
+            "type": "string",
+            "example": "+66620350322",
+            "nullable": true
+          }
+        }
       },
       "UserLoginRequest": {
         "type": "object",

@@ -81,7 +81,7 @@ pub async fn login(
 #[utoipa::path(
   tag = "Auth",
   responses(
-    (status = 200, description = "success", body = UserResponse),
+    (status = 200, description = "success", body = UserDetailResponse),
   ),
   security(
     ("bearer_token" = [])

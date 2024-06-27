@@ -1,4 +1,4 @@
-use crate::models::User;
+use crate::models::{User, UserInfo};
 use crate::requests::{ChangeAvatarRequest, ChangeUsernameRequest, UserUpdateRequest, UserLoginRequest};
 use crate::response::{ChangeAvatarResponse, ChangeUsernameResponse, UserLoginResponse, UserDetailResponse};
 use crate::controllers::{auth_controller, user_controller};
@@ -30,6 +30,7 @@ use utoipa::{
   ),
   components(schemas(
     User, 
+    UserInfo,
     UserLoginRequest,
     JwtToken,
     UserLoginResponse,
