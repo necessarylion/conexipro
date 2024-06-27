@@ -20,7 +20,7 @@ use validator::Validate;
 /// User login or registraion using firebase token
 #[utoipa::path(
   post,
-  path = "/api/auth/login",
+  path = "/auth/login",
   responses(
     (status = 200, description = "success", body = UserLoginResponse),
   ),
@@ -78,8 +78,6 @@ pub async fn login_or_register(
 
 /// Fetch user information
 #[utoipa::path(
-  get,
-  path = "/api/auth/user",
   responses(
     (status = 200, description = "success", body = User),
   ),
@@ -96,8 +94,6 @@ pub async fn fetch(req: HttpRequest, pool: Data<DbPool>) -> Result<impl Responde
 
 /// Refresh user new token
 #[utoipa::path(
-  get,
-  path = "/api/auth/refresh",
   responses(
     (status = 200, description = "success", body = UserLoginResponse),
   ),

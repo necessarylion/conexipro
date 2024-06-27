@@ -13,8 +13,6 @@ use validator::Validate;
 
 /// update user information
 #[utoipa::path(
-  post,
-  path = "/api/auth/user",
   responses(
     (status = 200, description = "success", body = User),
   ),
@@ -42,8 +40,6 @@ pub async fn update(
 
 /// change username
 #[utoipa::path(
-  put,
-  path = "/api/auth/user/username",
   responses(
     (status = 200, description = "success", body = ChangeUsernameResponse),
   ),
@@ -71,10 +67,9 @@ pub async fn change_username(
 
 /// change user avatar image
 #[utoipa::path(
-  put,
-  path = "/api/auth/user/avatar",
+  request_body(content = ChangeAvatarRequest, content_type = "multipart/form-data"),
   responses(
-    (status = 200, description = "success", body = ChangeUsernameResponse),
+    (status = 200, description = "success", body = ChangeAvatarResponse),
   ),
   security(
     ("bearer_token" = [])

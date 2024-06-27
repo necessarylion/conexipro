@@ -13,6 +13,13 @@ use utoipa::{
 
 #[derive(OpenApi)]
 #[openapi(
+  servers(
+    (url = "{BaseUrl}",
+      variables(
+        ("BaseUrl" = (default = "http://127.0.0.1:3335/api")),
+      )
+    )
+  ),
   paths(
     auth_controller::fetch, 
     auth_controller::login_or_register,
