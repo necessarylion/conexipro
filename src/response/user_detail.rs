@@ -3,7 +3,7 @@ use serde::Serialize;
 use utoipa::ToSchema;
 
 #[derive(Debug, Serialize, ToSchema)]
-pub struct UserDetailResponse {
+pub struct UserDetail {
   #[serde(flatten)]
   pub user: User,
   #[schema(

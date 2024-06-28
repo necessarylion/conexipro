@@ -2,7 +2,7 @@ use crate::{
   models::NewUserPayload,
   repository::UserRepo,
   requests::{ExtraRequests, UserLoginRequest},
-  response::{UserDetailResponse, UserLoginResponse},
+  response::{UserDetail, UserLoginResponse},
   utils::{
     db::{get_db_conn, DbConn},
     firebase::FireAuth,
@@ -94,7 +94,7 @@ pub async fn fetch_user(req: HttpRequest, pool: Data<DbPool>) -> Result<impl Res
   let user = auth.user(&pool).await?;
   let conn = &mut get_db_conn(&pool).await?;
   let infos = user.infos(conn).await?;
-  let res = UserDetailResponse { user, infos };
+  let res = UserDetail { user, infos };
   Ok(Json(res))
 }
 

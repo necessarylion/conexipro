@@ -6,7 +6,7 @@ use crate::{
   models::{user_info::NewUserInfoPayload, UpdateUserPayload, User},
   repository::{UserInfoRepo, UserRepo},
   requests::{ChangeUsernameRequest, UserInfoUpdateRequest, UserUpdateRequest},
-  response::{ChangeAvatarResponse, ChangeUsernameResponse, UserDetailResponse},
+  response::{ChangeAvatarResponse, ChangeUsernameResponse, UserDetail},
   utils::{
     db::{get_db_conn, DbConn},
     validate_file, SomeStr, StrWithDefault,
@@ -107,7 +107,7 @@ impl UserService {
   pub async fn update_user_info(
     &mut self,
     payload: UserInfoUpdateRequest,
-  ) -> Result<UserDetailResponse, IError> {
+  ) -> Result<UserDetail, IError> {
     let user_id = self.auth.id();
     let conn: &mut DbConn = &mut get_db_conn(&self.pool).await?;
 
@@ -135,6 +135,6 @@ impl UserService {
     // get user detail and infos
     let user = self.auth.user(&self.pool).await?;
     let infos = user.infos(conn).await?;
-    Ok(UserDetailResponse { user, infos })
+    Ok(UserDetail { user, infos })
   }
 }

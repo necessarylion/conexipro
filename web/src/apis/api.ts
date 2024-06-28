@@ -74,7 +74,7 @@ export interface User {
   username: string;
 }
 
-export type UserDetailResponse = User & {
+export type UserDetail = User & {
   /** @example "[{ "info_key": "facebook", "info_value": "https://facebook.com/zinkyaw", "info_type": "contact" }]" */
   infos: UserInfo[];
 };
@@ -380,7 +380,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @secure
      */
     fetchUser: (params: RequestParams = {}) =>
-      this.request<UserDetailResponse, any>({
+      this.request<any, any>({
         path: `/auth/user`,
         method: "GET",
         secure: true,
@@ -438,7 +438,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @secure
      */
     updateUserInfos: (data: UserInfoUpdateRequest, params: RequestParams = {}) =>
-      this.request<UserDetailResponse, any>({
+      this.request<any, any>({
         path: `/auth/user/infos`,
         method: "POST",
         body: data,
