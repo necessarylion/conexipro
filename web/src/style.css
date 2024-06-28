@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  font-family: "Readex Pro", sans-serif;
+  background: #F6F2F9;
+  font-weight: 300;
+}

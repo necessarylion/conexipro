@@ -1,6 +1,46 @@
 <template>
-  <div class="flex items-center h-screen w-full justify-center">
-    <div id="firebaseui-auth-container"></div>
+  <div class="flex items-center justify-center h-screen lg:px-40 md:px-10 px-0 sm:py-0 md:py-12">
+    <div class="flex flex-row w-full h-full shadow rounded-lg">
+      <!-- left -->
+      <div class="bg-background w-1/2 rounded-s-lg px-10 py-10 sm:hidden md:flex flex-col gap-3">
+        <div class="flex flex-row items-center gap-3">
+          <div>
+            <img src="/images/logo.png" class="w-[40px] rounded-full border border-grey">
+          </div>
+          <div>
+            <div class="text-white text-2xl font-semibold mb-3">Conexipro.</div>
+            <div class="text-whiteSecondary text-xs	mb-1">Let's create digital profile with us!</div>
+          </div>
+        </div>
+        <div class="flex-1 flex items-center justify-center">
+          <img src="/images/card.svg" class="w-full">
+        </div>
+      </div>
+
+      <!-- right -->
+      <div class="lg:w-1/2 md:w-1/2 w-full bg-offWhite sm:rounded-none md:rounded-e-lg px-20 py-10 flex flex-col">
+
+        <div>
+          <div class="text-black text-xl font-semibold mb-3">Conexipro.</div>
+          <div class="text-grey text-xs mb-7">Welcome back! login with your account to continue with us</div>
+        </div>
+
+        <div class="items-center justify-center flex flex-col flex-1">
+          <!-- google -->
+          <button
+            class="bg-white text-grey w-full rounded-md shadow text-xs py-3 mb-4 flex flex-row items-center justify-center gap-2">
+            <img src="/images/google.svg" class="w-[20px]">
+            <span>Login with Google</span>
+          </button>
+
+          <button
+            class="bg-white text-grey w-full rounded-md shadow text-xs py-3 mb-3 flex flex-row items-center justify-center gap-2">
+            <img src="/images/facebook.svg" class="w-[20px]">
+            <span>Login with Facebook</span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -18,17 +58,17 @@ const authStore = useAuthStore()
 const router = useRouter();
 
 onMounted(async () => {
-    if(authStore.user) {
-      router.push('/profile/' + authStore.user.username)
-    } else {
-      setupFirebaseLogin()
-    }
+  if (authStore.user) {
+    router.push('/profile/' + authStore.user.username)
+  } else {
+    setupFirebaseLogin()
+  }
 })
 
 function setupFirebaseLogin() {
   firebase.initializeApp(firebaseConfig);
   var ui = new firebaseui.auth.AuthUI(firebase.auth());
-  ui.start('#firebaseui-auth-container', {
+  ui.start('#firebase', {
     signInSuccessUrl: '/',
     signInOptions: [
       {
@@ -43,7 +83,7 @@ function setupFirebaseLogin() {
       let res = await authService.login(firebaseToken)
       window.localStorage.setItem("AUTH_TOKEN", res.token.token)
       authStore.setUser(res.user)
-      router.push('/profile/' + res.user.username)
+      // router.push('/profile/' + res.user.username)
     }
   });
 }
