@@ -10,13 +10,12 @@ import firebase from 'firebase/compat/app';
 import { useAuthStore } from '@/stores/authStore';
 import * as firebaseui from 'firebaseui'
 import 'firebaseui/dist/firebaseui.css'
-import { onMounted, ref } from 'vue';
+import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { Api } from '@/apis/api'
+import { authService } from '@/services/authService';
 
 const authStore = useAuthStore()
 const router = useRouter();
-const userToken = ref<string>()
 
 onMounted(async () => {
     if(authStore.user) {
@@ -38,16 +37,13 @@ function setupFirebaseLogin() {
     ],
   });
 
-  let api = new Api({
-    baseUrl: import.meta.env.VITE_BASE_URL,
-  });
-
   firebase.auth().onAuthStateChanged(async (user) => {
     if (user) {
-      const token = await user.getIdToken()
-      userToken.value = token
-      let res = await api.auth.login({token})
-      console.log(res)
+      const firebaseToken = await user.getIdToken()
+      let res = await authService.login(firebaseToken)
+      window.localStorage.setItem("AUTH_TOKEN", res.token.token)
+      authStore.setUser(res.user)
+      router.push('/profile/' + res.user.username)
     }
   });
 }

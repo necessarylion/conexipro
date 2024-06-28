@@ -1,8 +1,8 @@
-import { UserDetail } from "@/apis/api"
+import { User } from "@/apis/api"
 import { defineStore } from "pinia"
 
 interface State {
-  user?: UserDetail
+  user?: User
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -12,7 +12,7 @@ export const useAuthStore = defineStore('auth', {
     }
   },
   actions: {
-    setUser(user?: UserDetail) {
+    setUser(user?: User) {
       this.user = user
     },
   },
