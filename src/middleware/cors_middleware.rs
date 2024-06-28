@@ -1,3 +1,4 @@
+use crate::utils::get_env;
 use actix_cors::Cors;
 use actix_http::{header, Method};
 
@@ -10,7 +11,7 @@ struct CorsConfig {
 pub fn handler() -> Cors {
   // cors configuration
   let cors_config = CorsConfig {
-    headers: vec![header::AUTHORIZATION],
+    headers: vec![header::AUTHORIZATION, header::ACCEPT, header::CONTENT_TYPE],
     methods: vec![
       Method::GET,
       Method::POST,
@@ -19,7 +20,7 @@ pub fn handler() -> Cors {
       Method::HEAD,
       Method::OPTIONS,
     ],
-    origins: vec![String::from("*")],
+    origins: vec![get_env("ALLOW_ORIGIN").unwrap()],
   };
 
   return Cors::default()

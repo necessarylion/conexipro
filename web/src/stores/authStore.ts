@@ -5,11 +5,16 @@ interface State {
   user?: UserDetail
 }
 
-export const useUserStore = defineStore('auth', {
+export const useAuthStore = defineStore('auth', {
   state: (): State => {
     return {
       user: undefined,
     }
+  },
+  actions: {
+    setUser(user?: UserDetail) {
+      this.user = user
+    },
   },
 })
 
