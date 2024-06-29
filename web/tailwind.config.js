@@ -11,9 +11,9 @@ export default {
         primary: '#FF805D',
         black: '#3A3A3A',
         white: '#FFFFFF',
-        offWhite: '#FBFAF9',
         whiteSecondary: '#FCFBFC',
-        grey: '#898989'
+        grey: '#898989',
+        offGrey: '#EAEAEA'
       },
       borderRadius: {
         'lg': '1rem',

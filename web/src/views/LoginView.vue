@@ -1,8 +1,8 @@
 <template>
-  <div class="flex items-center justify-center h-screen lg:px-40 md:px-10 px-0 sm:py-0 md:py-12">
+  <div class="flex items-center justify-center h-screen lg:px-40 md:px-10 px-0 xs:py-0 md:py-12">
     <div class="flex flex-row w-full h-full shadow rounded-lg">
       <!-- left -->
-      <div class="bg-background w-1/2 rounded-s-lg px-10 py-10 sm:hidden md:flex flex-col gap-3">
+      <div class="bg-background w-1/2 rounded-s-lg px-10 py-10 md:flex hidden flex-col gap-3">
         <div class="flex flex-row items-center gap-3">
           <div>
             <img src="/images/logo.png" class="w-[40px] rounded-full border border-grey">
@@ -18,26 +18,40 @@
       </div>
 
       <!-- right -->
-      <div class="lg:w-1/2 md:w-1/2 w-full bg-offWhite sm:rounded-none md:rounded-e-lg px-20 py-10 flex flex-col">
+      <div class="bg-white lg:w-1/2 md:w-1/2 w-full sm:rounded-none md:rounded-e-lg lg:px-20 md:px-10 px-8 py-10 flex flex-col">
 
-        <div>
+        <div class="right-header">
           <div class="text-black text-xl font-semibold mb-3">Conexipro.</div>
           <div class="text-grey text-xs mb-7">Welcome back! login with your account to continue with us</div>
         </div>
 
-        <div class="items-center justify-center flex flex-col flex-1">
-          <!-- google -->
-          <button
+        <div class="items-center justify-center flex flex-col flex-1" id="firebase">
+          <!-- <button
             class="bg-white text-grey w-full rounded-md shadow text-xs py-3 mb-4 flex flex-row items-center justify-center gap-2">
             <img src="/images/google.svg" class="w-[20px]">
-            <span>Login with Google</span>
+            <span>Continue with Google</span>
           </button>
 
           <button
             class="bg-white text-grey w-full rounded-md shadow text-xs py-3 mb-3 flex flex-row items-center justify-center gap-2">
             <img src="/images/facebook.svg" class="w-[20px]">
-            <span>Login with Facebook</span>
+            <span>Continue with Facebook</span>
           </button>
+
+          <div class="flex flex-row items-center justify-center gap-2 w-full mb-5 mt-3">
+            <div class="bg-offGrey w-full h-[1px]"></div>
+            <div class="text-grey text-xs">or</div>
+            <div class="bg-offGrey w-full h-[1px]"></div>
+          </div>
+
+          <input type="text" placeholder="Email" class="bg-inputBackground w-full rounded-md text-xs p-3 mb-3">
+          <input type="password" placeholder="Password" class="bg-inputBackground w-full rounded-md text-xs p-3 mb-3">
+
+          <button
+            class="bg-primary text-white w-full rounded-md text-xs py-3 mb-3 flex flex-row items-center justify-center gap-2">
+            <span>Login</span>
+          </button> -->
+
         </div>
       </div>
     </div>
@@ -69,10 +83,18 @@ function setupFirebaseLogin() {
   firebase.initializeApp(firebaseConfig);
   var ui = new firebaseui.auth.AuthUI(firebase.auth());
   ui.start('#firebase', {
-    signInSuccessUrl: '/',
+    signInSuccessUrl: window.location.href,
     signInOptions: [
       {
         provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+      },
+      {
+        provider: firebase.auth.PhoneAuthProvider.PROVIDER_ID,
+        defaultCountry: 'THB'
+      },
+      {
+        provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+        signInMethod: firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD
       }
     ],
   });
@@ -82,7 +104,7 @@ function setupFirebaseLogin() {
       const firebaseToken = await user.getIdToken()
       let res = await authService.login(firebaseToken)
       window.localStorage.setItem("AUTH_TOKEN", res.token.token)
-      authStore.setUser(res.user)
+      // authStore.setUser(res.user)
       // router.push('/profile/' + res.user.username)
     }
   });
@@ -91,10 +113,8 @@ function setupFirebaseLogin() {
 </script>
 
 <style scoped>
-textarea {
-  width: 100%;
-  height: 500px;
-  border: 1px solid black;
-  outline: none;
+.right-header {
+  max-width: 315px;
+  margin: 0 auto;
 }
 </style>
