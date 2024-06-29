@@ -13,7 +13,7 @@
           </div>
         </div>
         <div class="flex-1 flex items-center justify-center">
-          <img src="/images/card.svg" class="w-full">
+          <img src="/images/card.svg" class="w-5/6">
         </div>
       </div>
 
@@ -26,32 +26,6 @@
         </div>
 
         <div class="items-center justify-center flex flex-col flex-1" id="firebase">
-          <!-- <button
-            class="bg-white text-grey w-full rounded-md shadow text-xs py-3 mb-4 flex flex-row items-center justify-center gap-2">
-            <img src="/images/google.svg" class="w-[20px]">
-            <span>Continue with Google</span>
-          </button>
-
-          <button
-            class="bg-white text-grey w-full rounded-md shadow text-xs py-3 mb-3 flex flex-row items-center justify-center gap-2">
-            <img src="/images/facebook.svg" class="w-[20px]">
-            <span>Continue with Facebook</span>
-          </button>
-
-          <div class="flex flex-row items-center justify-center gap-2 w-full mb-5 mt-3">
-            <div class="bg-offGrey w-full h-[1px]"></div>
-            <div class="text-grey text-xs">or</div>
-            <div class="bg-offGrey w-full h-[1px]"></div>
-          </div>
-
-          <input type="text" placeholder="Email" class="bg-inputBackground w-full rounded-md text-xs p-3 mb-3">
-          <input type="password" placeholder="Password" class="bg-inputBackground w-full rounded-md text-xs p-3 mb-3">
-
-          <button
-            class="bg-primary text-white w-full rounded-md text-xs py-3 mb-3 flex flex-row items-center justify-center gap-2">
-            <span>Login</span>
-          </button> -->
-
         </div>
       </div>
     </div>
@@ -87,14 +61,17 @@ function setupFirebaseLogin() {
     signInOptions: [
       {
         provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+        fullLabel: 'Continue with Google'
       },
       {
         provider: firebase.auth.PhoneAuthProvider.PROVIDER_ID,
-        defaultCountry: 'THB'
+        defaultCountry: 'THB',
+        fullLabel: 'Continue with Phone'
       },
       {
         provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
-        signInMethod: firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD
+        signInMethod: firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD,
+        fullLabel: 'Continue with Email'
       }
     ],
   });

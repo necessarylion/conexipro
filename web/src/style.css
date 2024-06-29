@@ -41,3 +41,8 @@ input {
 .mdl-card {
   box-shadow: none !important;
 }
+
+.firebaseui-idp-text{
+  font-size: 13px !important;
+  font-weight: 400;
+}
