@@ -4,10 +4,10 @@ import ProfileView from '@/views/ProfileVue.vue'
 
 const routes = [
   { path: '/', component: LoginView },
-  { path: '/profile/:username', component: ProfileView },
+  { path: '/profile', component: ProfileView }
 ]
 
 export default createRouter({
   history: createWebHistory(),
-  routes,
+  routes
 })

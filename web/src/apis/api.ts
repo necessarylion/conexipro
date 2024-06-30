@@ -380,7 +380,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @secure
      */
     fetchUser: (params: RequestParams = {}) =>
-      this.request<any, any>({
+      this.request<UserDetail, any>({
         path: `/auth/user`,
         method: "GET",
         secure: true,

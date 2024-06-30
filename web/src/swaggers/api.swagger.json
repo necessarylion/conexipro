@@ -90,7 +90,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserDetailResponse"
+                  "$ref": "#/components/schemas/UserDetail"
                 }
               }
             }
