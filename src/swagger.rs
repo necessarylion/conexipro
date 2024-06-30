@@ -28,7 +28,8 @@ use utoipa::{
     user_controller::update_user,
     user_controller::change_username,
     user_controller::change_avatar,
-    user_controller::update_user_infos
+    user_controller::update_user_infos,
+    user_controller::get_user_detail
   ),
   components(schemas(
     User, 

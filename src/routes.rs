@@ -26,6 +26,10 @@ pub fn get_api_services() -> Scope<
     // login or register do not required middleware to check token
     .route("/api/auth/login", post().to(auth_controller::login))
     .route(
+      "/api/user/{username}",
+      get().to(user_controller::get_user_detail),
+    )
+    .route(
       "/files/{filename:.*}",
       get().to(general_controller::render_file),
     )
