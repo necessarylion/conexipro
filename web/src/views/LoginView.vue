@@ -60,6 +60,7 @@ onMounted(async () => {
 function setupFirebaseLogin() {
   var ui = new firebaseui.auth.AuthUI(firebase.auth())
   ui.start('#firebase', {
+    signInFlow: 'popup',
     signInSuccessUrl: window.location.href,
     signInOptions: [
       {
