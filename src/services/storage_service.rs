@@ -62,8 +62,8 @@ impl StorageService {
       .map_err(|err| IError::ServerError(err.to_string()))
   }
 
-  /// delete file from aws
-  pub async fn delete(&self, key: &String) -> Result<(), IError> {
+  /// check if file exists
+  pub async fn exists(&self, key: &String) -> Result<bool, IError> {
     let client = self.get_client().await;
 
     // check if file exists
@@ -75,8 +75,19 @@ impl StorageService {
       .await
       .map_err(|err| IError::ServerError(err.to_string()));
 
-    // if not exists, return
     if val.is_err() {
+      return Ok(false);
+    }
+    return Ok(true);
+  }
+
+  /// delete file from aws
+  pub async fn delete(&self, key: &String) -> Result<(), IError> {
+    let client = self.get_client().await;
+    let exist = self.exists(key).await?;
+
+    // if not exists, return
+    if !exist {
       return Ok(());
     }
 

@@ -4,6 +4,10 @@ use crate::{services::StorageService, IError};
 
 pub async fn render_file(filename: Path<String>) -> Result<impl Responder, IError> {
   let storage = StorageService::new();
+  let file_exist = storage.exists(&filename).await?;
+  if !file_exist {
+    return Err(IError::NotFoundError("file not found".to_string()));
+  }
   let image_bytes = storage.get(&filename).await?;
   let image_bytes = image_bytes.to_vec();
   let content_type = mime_guess::from_path(filename.to_string()).first();
