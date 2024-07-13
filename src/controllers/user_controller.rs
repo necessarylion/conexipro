@@ -11,7 +11,7 @@ use crate::{
 };
 use actix_multipart::form::MultipartForm;
 use actix_web::{
-  get, post, put,
+  post, put,
   web::{self, Json},
   HttpRequest, Responder,
 };
